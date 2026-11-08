@@ -1,7 +1,11 @@
 from __future__ import annotations
 
 import numpy as np
+import subprocess
+import tomllib
+from pathlib import Path
 
+from fds.common.paths import workspace_root
 from fds.types import ActionSpec, Frame, Observation, StepResult
 
 TASKS = (
@@ -62,6 +66,19 @@ class RoboMME:
         self.stopped = False
 
     def _make_builder(self, task, split, max_steps):
+        import robomme
+
+        self.repo = workspace_root() / "third_party/robomme"
+        spec = tomllib.loads((workspace_root() / "configs/dependencies.toml").read_text())["robomme"]
+        self.revision = subprocess.check_output(
+            ["git", "-C", str(self.repo), "rev-parse", "HEAD"], text=True
+        ).strip()
+        if self.revision != spec["revision"]:
+            raise RuntimeError("RoboMME source differs from configs/dependencies.toml")
+        if not Path(robomme.__file__).resolve().is_relative_to(self.repo):
+            raise RuntimeError(
+                "RoboMME was imported outside FDS/third_party/robomme; use .venv-robomme"
+            )
         from robomme.env_record_wrapper import BenchmarkEnvBuilder
 
         return BenchmarkEnvBuilder(
