@@ -1,0 +1,9 @@
+# Linux x86_64 / Python 3.11. Install from the project root.
+-e .[api]
+-e third_party/robomme
+mani-skill @ git+https://github.com/YinpeiDai/ManiSkill.git@07be6fbc66350ddca200abfb0a11b692f078f7fd
+numpy==1.26.4
+opencv-python==4.11.0.86
+sapien==3.0.2
+torch==2.9.1
+torchvision==0.24.1

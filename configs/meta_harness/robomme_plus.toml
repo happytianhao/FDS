@@ -1,0 +1,29 @@
+# Training-only FDS meta harness. Validation/test are frozen and held out.
+executor = "task_harness"
+benchmark = "robomme_plus"
+max_rounds = 5
+max_changed_files = 4
+max_patch_bytes = 65536
+max_source_chars = 90000
+max_evidence_cases = 16
+check_timeout_seconds = 300
+episode_timeout_seconds = 14400
+
+[improver]
+backend = "codex"
+model = "gpt-6-astra"
+effort = "medium"
+timeout_seconds = 900
+
+[gate]
+suite = "development"
+min_success_gain = 1
+max_regressions = 0
+
+[development]
+split = "train"
+tasks = ["BinFill", "PickXtimes", "SwingXtimes", "StopCube", "VideoUnmask",
+         "VideoUnmaskSwap", "ButtonUnmask", "ButtonUnmaskSwap", "PickHighlight",
+         "VideoRepick", "VideoPlaceButton", "VideoPlaceOrder", "MoveCube",
+         "InsertPeg", "PatternLock", "RouteStick"]
+episodes = [0]

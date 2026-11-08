@@ -1,0 +1,7 @@
+[robomme]
+url = "https://github.com/RoboMME/robomme_benchmark.git"
+revision = "76ada2e066c93c9e59c9b0186d72b0108db0ac4d"
+
+[robomme_plus]
+url = "https://github.com/RoboMME/robomme_benchmark.git"
+revision = "69a2fe25cb476069943aa7dd754d19f0932d9ec3"

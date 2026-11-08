@@ -1,0 +1,20 @@
+{
+  "instructions": "Improve the FDS task harness from recorded training failures. Separate observed facts from hypotheses and preserve the FDS contract: every selected action must state assumptions, expected outcome, and falsifiers. Prefer one small general fix that addresses a reproducible cause. Inspect invalid tool calls, unresolved uncertainty, missing evidence, contact verification, recovery, and execution choice. Never encode task names, episode IDs, object truth, hidden scoring thresholds, or answers into the actor. Preserve evidence provenance and the configured memory boundary. Cite only development evidence and explain expected effects and risks. This meta harness may edit task harness source or task_harness skills between training episodes; benchmark, planner, model, evaluator, budgets, and promotion rules are protected.",
+  "failure_priority": [
+    "error",
+    "budget_exhausted",
+    "planner_finish",
+    "fail",
+    "success"
+  ],
+  "source_focus": [
+    "src/fds/task_harness/fds.py",
+    "src/fds/task_harness/protocol.py",
+    "src/fds/task_harness/runtime.py",
+    "src/fds/task_harness/actions.py",
+    "src/fds/task_harness/tools.py",
+    "src/fds/task_harness/memory.py",
+    "src/fds/task_harness/observation.py",
+    "src/fds/task_harness/contracts.py"
+  ]
+}

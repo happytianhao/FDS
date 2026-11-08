@@ -1,0 +1,39 @@
+# Credentials and machine-local settings
+.env
+.env.*
+*.local.toml
+auth.json
+credentials/
+*.pem
+*.key
+# Python / tooling
+.venv*/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.cache/
+core
+core.*
+.coverage*
+htmlcov/
+build/
+dist/
+.idea/
+.vscode/
+.DS_Store
+.whalent_tmp/
+# External code, datasets, weights, generated experiment artifacts
+third_party/
+data/
+checkpoints/
+runs/
+wandb/
+*.h5
+*.hdf5
+*.safetensors
+*.pt
+*.pth
+*.mp4
+*.pkl

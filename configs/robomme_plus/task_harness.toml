@@ -1,0 +1,47 @@
+# FDS task harness: the initial public baseline intentionally has no skills.
+method = "task_harness"
+
+[benchmark]
+name = "robomme_plus"
+task = "All"
+split = "train"
+max_steps = 10000
+calibration = true
+
+[planner]
+backend = "codex"
+model = "gpt-6-astra"
+effort = "medium"
+timeout = 600
+
+[policy]
+enabled = false
+
+[task_harness]
+max_keyframes = 4
+demo_frames = 16
+initial_live_frames = 6
+max_tool_calls = 8
+max_pose_targets = 32
+max_observation_frames = 12
+skills = []
+
+[task_harness.pose_limits]
+max_rotation_rad = 0.6
+max_joint_delta_rad = 1.2
+max_joint_step_rad = 0.08
+
+[examples]
+enabled = false
+episode = 0
+max_frames = 16
+
+[run]
+episodes = [0]
+max_calls = 100
+max_tool_steps = 400
+isolate_episodes = true
+episode_timeout = 14400
+validation_only = false
+seed = 7
+output = "runs/robomme_plus/task_harness"
