@@ -2,6 +2,8 @@
 
 这份文档记录论文的工作定位、核心 idea 和 contribution 草稿。它是写作工作笔记，不替代最终论文中的正式定义、实验结果和引用。
 
+对应的分层实验方案见 [`docs/experiment_design.md`](experiment_design.md)。
+
 ## 一句话定位
 
 FDS（Falsifiable Decision State）把具身智能中的每次决策显式表示为一个可由 host 检查、带有证据来源、预期结果和反证条件的决策契约，使系统能够区分“动作已经执行”与“任务语义上已经成功”，并为纠错、审计和后续改进提供共同接口。
