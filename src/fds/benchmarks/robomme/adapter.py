@@ -1,9 +1,10 @@
 from __future__ import annotations
 
-import numpy as np
 import subprocess
 import tomllib
 from pathlib import Path
+
+import numpy as np
 
 from fds.common.paths import workspace_root
 from fds.types import ActionSpec, Frame, Observation, StepResult
