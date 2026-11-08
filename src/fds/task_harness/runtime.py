@@ -25,7 +25,7 @@ from fds.task_harness.tools import ToolSession
 class TaskHarness(EpisodeIO):
     tool_step_limit = 400
 
-    def __init__(self, *args, options=None, examples=None, **kwargs):
+    def __init__(self, *args, options=None, examples=None, fds_options=None, **kwargs):
         super().__init__(*args, **kwargs)
         if self.policy is not None:
             raise ValueError("task_harness is a direct Sys2 executor and does not use a VLA")
@@ -39,6 +39,17 @@ class TaskHarness(EpisodeIO):
         self.skills = validate_skills(opts.pop("skills", []))
         self.limits = opts.pop("pose_limits", {})
         self.examples = examples
+        fds_options = deepcopy(fds_options or {})
+        enabled = fds_options.pop("enabled", True)
+        if type(enabled) is not bool:
+            raise ValueError("fds.enabled must be a boolean")
+        self.contract_mode = fds_options.pop("contract_mode", "full")
+        if self.contract_mode not in ("off", "full"):
+            raise ValueError("fds.contract_mode must be 'off' or 'full'")
+        if not enabled:
+            self.contract_mode = "off"
+        if fds_options:
+            raise ValueError(f"Unknown fds options: {sorted(fds_options)}")
         for name, value, low, high in (
             ("max_keyframes", self.max_keyframes, 0, 8),
             ("demo_frames", self.demo_frames, 1, 32),
@@ -74,6 +85,7 @@ class TaskHarness(EpisodeIO):
         def state():
             return {
                 "method": "task_harness",
+                "contract_mode": self.contract_mode,
                 "step": session.steps if session else 0,
                 "memory_enabled": True,
                 "current_frame": session.observation.current.index if session else None,
@@ -147,12 +159,10 @@ class TaskHarness(EpisodeIO):
                     log({"event": "retained_read", "frame_ids": list(memory.frames)})
                 context = {
                     "decision_protocol": "task_harness",
-                    "fds_protocol": {
-                        "version": "fds_v1",
-                        "contract_required": True,
-                        "semantic_success": "never inferred from command execution alone",
-                        "statuses": ["supported", "contradicted", "uncertain"],
-                    },
+                    # Used by the local schema/audit path; make_prompt removes this
+                    # experiment switch so the model never receives FDS instructions
+                    # in the contract-off baseline.
+                    "contract_mode": self.contract_mode,
                     "task_goal": observation.goal,
                     "tool_definitions": definitions(
                         budget,
@@ -163,7 +173,9 @@ class TaskHarness(EpisodeIO):
                     "max_tool_steps": budget,
                     "max_tool_calls": self.max_tool_calls,
                     "max_observation_frames": self.max_observation_frames,
-                    "execution_contract": execution_contract(actions.limits),
+                    "execution_contract": execution_contract(
+                        actions.limits, contract_mode=self.contract_mode
+                    ),
                     "image_labels": labels,
                     "current_frame": observation.current.index,
                     "observation": {
@@ -218,8 +230,6 @@ class TaskHarness(EpisodeIO):
                     "latest_execution": deepcopy(session.latest_execution),
                     "last_tool_result": deepcopy(session.last_result),
                     "last_environment_result": deepcopy(session.last_environment_result),
-                    "last_fds_contract": deepcopy(last_fds_contract),
-                    "last_fds_verdict": deepcopy(last_fds_verdict),
                     "environment_steps": steps,
                     "remaining_environment_steps": session.remaining(),
                     "remaining_calls": self.max_calls - calls,
@@ -244,6 +254,15 @@ class TaskHarness(EpisodeIO):
                         "tcp_source": "FK from measured robot joints; no object ground truth",
                     },
                 }
+                if self.contract_mode == "full":
+                    context["fds_protocol"] = {
+                        "version": "fds_v1",
+                        "contract_required": True,
+                        "semantic_success": "never inferred from command execution alone",
+                        "statuses": ["supported", "contradicted", "uncertain"],
+                    }
+                    context["last_fds_contract"] = deepcopy(last_fds_contract)
+                    context["last_fds_verdict"] = deepcopy(last_fds_verdict)
                 conventions = getattr(self.env, "task_language_conventions", None)
                 if conventions:
                     context["task_language_conventions"] = conventions()
@@ -259,6 +278,8 @@ class TaskHarness(EpisodeIO):
                 )
                 response = self.planner.decide(context, paths, output / f"call_{calls - 1:04d}")
                 value = asdict(response)
+                if self.contract_mode == "off":
+                    value.pop("fds_contract", None)
                 audit.decision(value)
                 decision = TaskDecision.parse(
                     value,
@@ -266,32 +287,34 @@ class TaskHarness(EpisodeIO):
                     delivered_frames=[f.index for f in pending],
                     retained_frames=list(memory.frames),
                 )
-                last_fds_contract = deepcopy(decision.fds_contract)
-                AuditJournal.write(
-                    audit.root / f"call_{calls - 1:04d}" / "fds_contract.json",
-                    decision.fds_contract,
-                )
+                if decision.fds_contract is not None:
+                    last_fds_contract = deepcopy(decision.fds_contract)
+                    AuditJournal.write(
+                        audit.root / f"call_{calls - 1:04d}" / "fds_contract.json",
+                        decision.fds_contract,
+                    )
                 memory.update(decision, pending, calls, log)
                 AuditJournal.write(
                     output / "memory_versions" / f"call_{calls - 1:04d}.json", memory.state()
                 )
                 log({"event": "decision", "call": calls, "step": steps, **value})
                 batch = session.execute(decision, calls, memory.frames)
-                last_fds_verdict = execution_verdict(
-                    decision.fds_contract, batch.receipts
-                )
-                AuditJournal.write(
-                    audit.root / f"call_{calls - 1:04d}" / "fds_verdict.json",
-                    last_fds_verdict,
-                )
-                log(
-                    {
-                        "event": "fds_verdict",
-                        "call": calls,
-                        "step": steps,
-                        **last_fds_verdict,
-                    }
-                )
+                if decision.fds_contract is not None:
+                    last_fds_verdict = execution_verdict(
+                        decision.fds_contract, batch.receipts
+                    )
+                    AuditJournal.write(
+                        audit.root / f"call_{calls - 1:04d}" / "fds_verdict.json",
+                        last_fds_verdict,
+                    )
+                    log(
+                        {
+                            "event": "fds_verdict",
+                            "call": calls,
+                            "step": steps,
+                            **last_fds_verdict,
+                        }
+                    )
                 stop = batch.stop_reason or stop
                 if batch.stop_reason or session.remaining() <= 0 or calls >= self.max_calls:
                     session.expire("episode_end" if batch.stop_reason else "budget_exhausted")
@@ -300,6 +323,7 @@ class TaskHarness(EpisodeIO):
                     break
             summary = {
                 "method": "task_harness",
+                "contract_mode": self.contract_mode,
                 "episode": episode,
                 "task_goal": session.observation.goal,
                 "steps": session.steps if session else 0,
@@ -314,6 +338,7 @@ class TaskHarness(EpisodeIO):
         except BaseException as exc:
             summary = {
                 "method": "task_harness",
+                "contract_mode": self.contract_mode,
                 "episode": episode,
                 "steps": session.steps if session else 0,
                 "planner_calls": calls,

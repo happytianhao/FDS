@@ -11,7 +11,8 @@ There are no copied historical result directories, credentials, or dependency ch
 
 ## FDS protocol
 
-Every Sys2 response contains `tool_batch`, `fds_contract`, `memory_changes`, and `keyframe_changes`. `fds_contract` records:
+The full FDS protocol adds `fds_contract` to the normal Sys2 response, alongside
+`tool_batch`, `memory_changes`, and `keyframe_changes`. `fds_contract` records:
 
 - the selected candidate action;
 - assumptions and their evidence references;
@@ -20,7 +21,26 @@ Every Sys2 response contains `tool_batch`, `fds_contract`, `memory_changes`, and
 - required evidence still missing;
 - risk and commitment state.
 
-The host validates the contract before execution and writes it to `audit/call_XXXX/fds_contract.json`. After the batch, FDS records a separate verdict. A successful command receipt is never treated as proof of semantic task success: the verdict is `contradicted` for explicit public execution errors and `uncertain` when the command ran but the task outcome is not publicly verified. This makes mistakes traceable for later meta-harness diagnosis.
+In the default `contract_mode = "full"`, the host validates the contract before
+execution and writes it to `audit/call_XXXX/fds_contract.json`. After the batch,
+FDS records a separate verdict. A successful command receipt is never treated as
+proof of semantic task success: the verdict is `contradicted` for explicit public
+execution errors and `uncertain` when the command ran but the task outcome is not
+publicly verified. This makes mistakes traceable for later meta-harness diagnosis.
+
+For the fair ablation baseline, set:
+
+```toml
+[fds]
+enabled = false
+contract_mode = "off"
+```
+
+This removes the FDS response field, decision-state instructions, contract
+validation, and contract/verdict audit files while preserving the same RGB
+observations, memory, environment and auxiliary tools, and budgets. The mode is
+also removed from the model prompt, so the baseline cannot see an instruction to
+produce a contract. `contract_mode = "full"` restores the complete protocol.
 
 The first public configuration intentionally has `skills = []`. The interface is already present so skills can be added later from training evidence without changing the benchmark, model, or evaluator.
 

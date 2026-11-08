@@ -86,18 +86,9 @@ def definitions(budget, gripper, max_pose_targets, max_observation_frames=12):
     return tools
 
 
-def execution_contract(limits):
-    return {
+def execution_contract(limits, *, contract_mode="full"):
+    result = {
         "version": "fds_task_execution_v1",
-        "decision_state": {
-            "version": "fds_v1",
-            "required": "Every response includes fds_contract.",
-            "purpose": "Connect the selected tool batch to explicit assumptions, evidence references, expected outcome and falsifiers.",
-            "candidate_rule": "List the selected candidate and any plausible alternatives. A candidate may be committed only when its required assumptions are supported and required evidence is resolved.",
-            "evidence_rule": "Cite only frames delivered in this request or explicitly retained keyframes. Missing evidence is unknown, not success.",
-            "outcome_rule": "Command execution is not semantic success. Public receipts can contradict a contract; otherwise semantic status remains uncertain until a later decision verifies it.",
-            "risk_rule": "High-risk actions require non-empty falsifiers and a committed contract; unresolved assumptions must not be silently treated as facts.",
-        },
         "response": {
             "tool_batch": "Exactly one batch per response. Environment: {kind: environment, subgoal, tool_calls, observation_steps}. Auxiliary: {kind: auxiliary, tool_calls}; omit subgoal and observation_steps entirely. These batch fields never appear at response top level.",
             "memory_changes": "Unchanged top-level incremental memory updates, in either batch kind.",
@@ -149,3 +140,14 @@ def execution_contract(limits):
             },
         },
     }
+    if contract_mode != "off":
+        result["decision_state"] = {
+            "version": "fds_v1",
+            "required": "Every response includes fds_contract.",
+            "purpose": "Connect the selected tool batch to explicit assumptions, evidence references, expected outcome and falsifiers.",
+            "candidate_rule": "List the selected candidate and any plausible alternatives. A candidate may be committed only when its required assumptions are supported and required evidence is resolved.",
+            "evidence_rule": "Cite only frames delivered in this request or explicitly retained keyframes. Missing evidence is unknown, not success.",
+            "outcome_rule": "Command execution is not semantic success. Public receipts can contradict a contract; otherwise semantic status remains uncertain until a later decision verifies it.",
+            "risk_rule": "High-risk actions require non-empty falsifiers and a committed contract; unresolved assumptions must not be silently treated as facts.",
+        }
+    return result

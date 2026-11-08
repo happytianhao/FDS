@@ -17,6 +17,10 @@ timeout = 600
 [policy]
 enabled = false
 
+[fds]
+enabled = true
+contract_mode = "full"
+
 [task_harness]
 max_keyframes = 4
 demo_frames = 16

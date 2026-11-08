@@ -85,11 +85,10 @@ def schema_for(context):
         if LIMITS[group] is not None:
             updates["maxItems"] = LIMITS[group]
         memory_changes[group] = updates
-    return obj(
-        tool_batch={"anyOf": batches},
-        fds_contract=FDS_CONTRACT,
-        memory_changes=obj(**memory_changes),
-        keyframe_changes=array(
+    response = {
+        "tool_batch": {"anyOf": batches},
+        "memory_changes": obj(**memory_changes),
+        "keyframe_changes": array(
             {
                 "anyOf": [
                     obj(
@@ -103,13 +102,16 @@ def schema_for(context):
             },
             16,
         ),
-    )
+    }
+    if context.get("contract_mode", "full") != "off":
+        response["fds_contract"] = FDS_CONTRACT
+    return obj(**response)
 
 
 @dataclass
 class TaskDecision:
     tool_batch: dict
-    fds_contract: dict
+    fds_contract: dict | None
     memory_changes: dict
     keyframe_changes: list
 
@@ -123,24 +125,34 @@ class TaskDecision:
         if len(set(steps)) != len(steps):
             raise ValueError("observation_steps must contain unique relative steps")
         validate_batch(batch)
-        validate_contract(
-            value["fds_contract"],
-            delivered_frames=delivered_frames,
-            retained_frames=retained_frames,
-        )
+        fds_contract = value.get("fds_contract")
+        if fds_contract is not None:
+            validate_contract(
+                fds_contract,
+                delivered_frames=delivered_frames,
+                retained_frames=retained_frames,
+            )
         reviews = [t for t in batch["tool_calls"] if t["name"] == "review_frames"]
         if reviews:
             ids = reviews[0]["arguments"]["frame_ids"]
             if len(ids) != len(set(ids)):
                 raise ValueError("Review frame IDs must be unique")
-        return cls(**deepcopy(value))
+        return cls(
+            tool_batch=deepcopy(value["tool_batch"]),
+            fds_contract=deepcopy(fds_contract),
+            memory_changes=deepcopy(value["memory_changes"]),
+            keyframe_changes=deepcopy(value["keyframe_changes"]),
+        )
 
 
 def make_prompt(context):
+    prompt_context = deepcopy(context)
+    # contract_mode is an executor-side ablation switch, not a model instruction.
+    prompt_context.pop("contract_mode", None)
     return (
         SYSTEM_PROMPT
         + "\n"
-        + json.dumps(context, ensure_ascii=False, allow_nan=False, separators=(",", ":"))
+        + json.dumps(prompt_context, ensure_ascii=False, allow_nan=False, separators=(",", ":"))
     )
 
 

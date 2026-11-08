@@ -118,6 +118,22 @@ def resolve_executor_defaults(config):
         if "baseline" in config:
             raise ValueError("task_harness does not accept baseline options")
         config.setdefault("task_harness", {})
+        fds = config.setdefault("fds", {})
+        if not isinstance(fds, dict):
+            raise ValueError("fds must be a table")
+        unknown = set(fds) - {"enabled", "contract_mode"}
+        if unknown:
+            raise ValueError(f"Unknown fds options: {sorted(unknown)}")
+        enabled = fds.get("enabled", True)
+        if type(enabled) is not bool:
+            raise ValueError("fds.enabled must be a boolean")
+        mode = fds.get("contract_mode", "full" if enabled else "off")
+        if mode not in ("off", "full"):
+            raise ValueError("fds.contract_mode must be 'off' or 'full'")
+        if not enabled:
+            mode = "off"
+        fds["enabled"] = mode != "off"
+        fds["contract_mode"] = mode
         from fds.task_harness.skills import validate_skills
 
         validate_skills(config["task_harness"].get("skills", []))
@@ -167,6 +183,7 @@ def execute_episode(config, task, episode, output):
             TaskHarness,
             {
                 "options": config["task_harness"],
+                "fds_options": config["fds"],
                 "examples": example_loader(config.get("examples", {}), name, task),
             },
         )

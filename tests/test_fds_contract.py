@@ -1,4 +1,6 @@
+from fds.task_harness.contracts import definitions, execution_contract
 from fds.task_harness.fds import execution_verdict, validate_contract
+from fds.task_harness.protocol import TaskDecision, mock_decision, schema_for
 
 
 def contract(status="supported"):
@@ -47,3 +49,29 @@ def test_execution_receipt_does_not_claim_semantic_success():
     assert execution_verdict(
         contract(), [{"status": "rejected", "environment_feedback": {}}]
     )["status"] == "contradicted"
+
+
+def test_contract_off_removes_fds_schema_and_execution_rules():
+    context = {
+        "contract_mode": "off",
+        "tool_definitions": definitions(8, True, 4),
+        "max_tool_calls": 8,
+        "max_tool_steps": 8,
+        "max_observation_frames": 4,
+    }
+    schema = schema_for(context)
+    assert "fds_contract" not in schema["properties"]
+    decision = mock_decision(context)
+    value = {
+        "tool_batch": decision.tool_batch,
+        "memory_changes": decision.memory_changes,
+        "keyframe_changes": decision.keyframe_changes,
+    }
+    parsed = TaskDecision.parse(value, schema, delivered_frames=[0], retained_frames=[])
+    assert parsed.fds_contract is None
+    limits = type(
+        "Limits",
+        (),
+        {"max_rotation_rad": 0.6, "max_joint_delta_rad": 1.2, "max_joint_step_rad": 0.08},
+    )()
+    assert "decision_state" not in execution_contract(limits, contract_mode="off")
