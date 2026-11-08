@@ -32,8 +32,11 @@ def setup(name: str) -> Path:
             f"python scripts/setup_dependencies.py {name}"
         )
     environment = ENVIRONMENTS[name]
-    subprocess.run(["uv", "venv", str(environment), "--python", "3.11"], cwd=ROOT, check=True)
     python = python_for(environment)
+    if not python.exists():
+        subprocess.run(
+            ["uv", "venv", str(environment), "--python", "3.11"], cwd=ROOT, check=True
+        )
     subprocess.run(
         [
             "uv",

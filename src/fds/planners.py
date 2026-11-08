@@ -23,6 +23,9 @@ def make_prompt(context):
 
 
 class MockPlanner:
+    def __init__(self, **_kwargs):
+        pass
+
     def decide(self, context, images, directory):
         if context.get("decision_protocol") == "task_harness":
             from fds.task_harness.protocol import mock_decision
