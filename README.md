@@ -44,14 +44,31 @@ Fetch the exact benchmark revisions recorded in `configs/dependencies.toml`:
 
 ```bash
 .venv/bin/python scripts/setup_dependencies.py robomme_plus
-# or: .venv/bin/python scripts/setup_dependencies.py robomme
+# and, if you also need the original benchmark:
+.venv/bin/python scripts/setup_dependencies.py robomme
 ```
 
-The benchmark packages may have their own simulator dependencies. Install those into the environment described by the corresponding lock/text files under `requirements/`; do not point FDS at a mutable Harness checkout.
+Build the simulator environments inside FDS. The Plus environment is `.venv`; the original RoboMME environment is `.venv-robomme`. They are separate because both releases expose a package named `robomme` but must use different pinned source revisions.
+
+```bash
+.venv/bin/python scripts/setup_environment.py robomme_plus
+.venv/bin/python scripts/setup_environment.py robomme
+```
+
+The setup script installs FDS and the selected local checkout into that environment, including the pinned ManiSkill, SAPIEN, PyTorch and computer-vision dependencies. It never reads or modifies Harness environments. The corresponding frozen dependency snapshots are under `requirements/`.
+
+Verify the simulator without calling Astra:
+
+```bash
+.venv/bin/python scripts/verify_environment.py robomme_plus
+.venv-robomme/bin/python scripts/verify_environment.py robomme
+```
+
+Each command resets `BinFill` episode 0 on the training split, checks RGB/state/action dimensions, and records the exact local benchmark commit. If a package is accidentally imported from another checkout, the adapter fails fast.
 
 ## Run a reproducible training episode
 
-RoboMME-Plus is the default and should be used first. The checked-in configs use the training split, episode 0, process isolation, and no skills.
+RoboMME-Plus is the default and should be used first. The checked-in configs use the training split, episode 0, process isolation, and no skills. Run Plus with `.venv`; run original RoboMME with `.venv-robomme`.
 
 ```bash
 .venv/bin/fds run \
@@ -64,7 +81,7 @@ RoboMME-Plus is the default and should be used first. The checked-in configs use
 Use the original benchmark after the Plus smoke run:
 
 ```bash
-.venv/bin/fds run \
+.venv-robomme/bin/fds run \
   --config configs/robomme/task_harness.toml \
   --task BinFill \
   --episodes 0 \
