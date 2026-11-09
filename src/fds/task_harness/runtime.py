@@ -17,7 +17,7 @@ from fds.task_harness.observation import (
     group_images_by_camera,
     image_inputs,
 )
-from fds.task_harness.protocol import TaskDecision, schema_for
+from fds.task_harness.protocol import DecisionValidationError, TaskDecision, schema_for
 from fds.task_harness.skills import validate_skills
 from fds.task_harness.tools import ToolSession
 
@@ -36,6 +36,7 @@ class TaskHarness(EpisodeIO):
         self.max_tool_calls = opts.pop("max_tool_calls", 8)
         self.max_pose_targets = opts.pop("max_pose_targets", 32)
         self.max_observation_frames = opts.pop("max_observation_frames", 12)
+        self.max_decision_corrections = opts.pop("max_decision_corrections", 2)
         self.skills = validate_skills(opts.pop("skills", []))
         self.limits = opts.pop("pose_limits", {})
         self.examples = examples
@@ -57,6 +58,7 @@ class TaskHarness(EpisodeIO):
             ("max_tool_calls", self.max_tool_calls, 1, 16),
             ("max_pose_targets", self.max_pose_targets, 1, 64),
             ("max_observation_frames", self.max_observation_frames, 1, 32),
+            ("max_decision_corrections", self.max_decision_corrections, 0, 5),
         ):
             if type(value) is not int or not low <= value <= high:
                 raise ValueError(f"Invalid {name}: expected integer in {low}..{high}")
@@ -77,6 +79,8 @@ class TaskHarness(EpisodeIO):
         )
         calls, stop = 0, "budget_exhausted"
         last_fds_contract, last_fds_verdict = None, None
+        rejection = None
+        consecutive_rejections = rejected_decisions = correction_calls = recovered_decisions = 0
         summary, session = None, None
 
         def log(event):
@@ -230,6 +234,7 @@ class TaskHarness(EpisodeIO):
                     "latest_execution": deepcopy(session.latest_execution),
                     "last_tool_result": deepcopy(session.last_result),
                     "last_environment_result": deepcopy(session.last_environment_result),
+                    "recent_motion_history": deepcopy(session.motion_history),
                     "environment_steps": steps,
                     "remaining_environment_steps": session.remaining(),
                     "remaining_calls": self.max_calls - calls,
@@ -266,6 +271,21 @@ class TaskHarness(EpisodeIO):
                 conventions = getattr(self.env, "task_language_conventions", None)
                 if conventions:
                     context["task_language_conventions"] = conventions()
+                if rejection is not None:
+                    context["decision_recovery"] = {
+                        "previous_rejection": deepcopy(rejection),
+                        "instruction": "The previous response was rejected before any tool or "
+                        "memory update. Return a complete corrected decision using the unchanged "
+                        "observations and valid memory. Do not invent evidence or mark unresolved "
+                        "claims supported just to pass validation. This is not a new physical "
+                        "attempt; previous execution feedback remains historical. Each correction "
+                        "uses one remaining planner call.",
+                        "corrections_remaining_including_this_call": min(
+                            self.max_decision_corrections - consecutive_rejections + 1,
+                            self.max_calls - calls,
+                        ),
+                    }
+                    correction_calls += 1
                 calls += 1
                 audit.begin(calls, context, paths, state())
                 log(
@@ -276,17 +296,50 @@ class TaskHarness(EpisodeIO):
                         "frames": [f.index for f in pending],
                     }
                 )
-                response = self.planner.decide(context, paths, output / f"call_{calls - 1:04d}")
-                value = asdict(response)
-                if self.contract_mode == "off":
-                    value.pop("fds_contract", None)
-                audit.decision(value)
-                decision = TaskDecision.parse(
-                    value,
-                    schema_for(context),
-                    delivered_frames=[f.index for f in pending],
-                    retained_frames=list(memory.frames),
-                )
+                try:
+                    response = self.planner.decide(context, paths, output / f"call_{calls - 1:04d}")
+                    value = asdict(response)
+                    if self.contract_mode == "off":
+                        value.pop("fds_contract", None)
+                    audit.decision(value)
+                    decision = TaskDecision.parse(
+                        value,
+                        schema_for(context),
+                        delivered_frames=[f.index for f in pending],
+                        retained_frames=list(memory.frames),
+                    )
+                except DecisionValidationError as exc:
+                    consecutive_rejections += 1
+                    rejected_decisions += 1
+                    rejection = {
+                        **exc.feedback(),
+                        "call": calls,
+                        "status": "rejected",
+                        "consecutive_rejections": consecutive_rejections,
+                        "environment_advanced": False,
+                        "memory_updated": False,
+                    }
+                    AuditJournal.write(
+                        audit.root / f"call_{calls - 1:04d}" / "decision_rejection.json", rejection
+                    )
+                    log({"event": "decision_rejected", "step": steps, **rejection})
+                    audit.finish(state(), [], error={"type": type(exc).__name__, "message": str(exc)})
+                    if calls >= self.max_calls or consecutive_rejections > self.max_decision_corrections:
+                        stop = (
+                            "budget_exhausted" if calls >= self.max_calls
+                            else "decision_recovery_exhausted"
+                        )
+                        session.expire(stop)
+                        break
+                    continue
+                if rejection is not None:
+                    recovered_decisions += 1
+                    recovery = {"call": calls, "rejected_calls": consecutive_rejections}
+                    AuditJournal.write(
+                        audit.root / f"call_{calls - 1:04d}" / "decision_recovery.json", recovery
+                    )
+                    log({"event": "decision_recovered", **recovery})
+                rejection, consecutive_rejections = None, 0
                 if decision.fds_contract is not None:
                     last_fds_contract = deepcopy(decision.fds_contract)
                     AuditJournal.write(
@@ -376,5 +429,12 @@ class TaskHarness(EpisodeIO):
                     raise
             finally:
                 if summary is not None:
+                    summary["decision_recovery"] = {
+                        "max_corrections": self.max_decision_corrections,
+                        "rejected_decisions": rejected_decisions,
+                        "correction_calls": correction_calls,
+                        "recovered_decisions": recovered_decisions,
+                        "last_rejection": rejection,
+                    }
                     AuditJournal.write(output / "summary.json", summary)
         return summary

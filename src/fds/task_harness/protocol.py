@@ -45,6 +45,22 @@ RECORDS["objects"]["properties"]["last_seen_frame"] = {
 LIMITS = {"objects": None, "events": 32, "experiences": 16}
 
 
+class DecisionValidationError(ValueError):
+    """A model response rejected before any memory update or tool execution."""
+
+    def __init__(self, message, *, code, path, response):
+        super().__init__(message)
+        self.code, self.path, self.response = code, list(path), response
+
+    def feedback(self):
+        return {
+            "code": self.code,
+            "path": self.path,
+            "message": str(self),
+            "rejected_response": self.response,
+        }
+
+
 def schema_for(context):
     tools = context["tool_definitions"]
     batches = []
@@ -117,26 +133,49 @@ class TaskDecision:
 
     @classmethod
     def parse(cls, value, schema, *, delivered_frames=None, retained_frames=None):
-        jsonschema.validate(value, schema)
-        json.dumps(value, allow_nan=False)
+        # Only model-output validation errors enter recovery. Invalid schemas and
+        # implementation errors must still propagate as fatal errors.
+        response = json.dumps(value, ensure_ascii=False)
+        try:
+            jsonschema.validate(value, schema)
+        except jsonschema.ValidationError as exc:
+            raise DecisionValidationError(
+                exc.message, code="schema_validation", path=exc.absolute_path, response=response
+            ) from exc
+        try:
+            json.dumps(value, allow_nan=False)
+        except ValueError as exc:
+            raise DecisionValidationError(
+                str(exc), code="non_finite_json", path=[], response=response
+            ) from exc
         # The provider's structured-output schema does not support uniqueItems.
         batch = value["tool_batch"]
         steps = batch.get("observation_steps", [])
-        if len(set(steps)) != len(steps):
-            raise ValueError("observation_steps must contain unique relative steps")
-        validate_batch(batch)
+        try:
+            if len(set(steps)) != len(steps):
+                raise ValueError("observation_steps must contain unique relative steps")
+            validate_batch(batch)
+            reviews = [t for t in batch["tool_calls"] if t["name"] == "review_frames"]
+            if reviews:
+                ids = reviews[0]["arguments"]["frame_ids"]
+                if len(ids) != len(set(ids)):
+                    raise ValueError("Review frame IDs must be unique")
+        except ValueError as exc:
+            raise DecisionValidationError(
+                str(exc), code="batch_validation", path=["tool_batch"], response=response
+            ) from exc
         fds_contract = value.get("fds_contract")
         if fds_contract is not None:
-            validate_contract(
-                fds_contract,
-                delivered_frames=delivered_frames,
-                retained_frames=retained_frames,
-            )
-        reviews = [t for t in batch["tool_calls"] if t["name"] == "review_frames"]
-        if reviews:
-            ids = reviews[0]["arguments"]["frame_ids"]
-            if len(ids) != len(set(ids)):
-                raise ValueError("Review frame IDs must be unique")
+            try:
+                validate_contract(
+                    fds_contract,
+                    delivered_frames=delivered_frames,
+                    retained_frames=retained_frames,
+                )
+            except ValueError as exc:
+                raise DecisionValidationError(
+                    str(exc), code="contract_validation", path=["fds_contract"], response=response
+                ) from exc
         return cls(
             tool_batch=deepcopy(value["tool_batch"]),
             fds_contract=deepcopy(fds_contract),

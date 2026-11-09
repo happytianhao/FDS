@@ -90,6 +90,7 @@ class ToolSession:
         self.delivered, self.review_history = set(), []
         self.review_result = self.sampling = self.latest_execution = None
         self.last_result = self.last_environment_result = None
+        self.motion_history = []
         self.environment_batches = 0
         self.batch_counts = {"environment": 0, "auxiliary": 0}
 
@@ -307,6 +308,12 @@ class ToolSession:
             self.log({"event": "rejected_action", **receipt})
             return receipt, True
         executed, feedback, result, halt = 0, {}, None, False
+        endpoint_steps, elapsed = set(), 0
+        for target in details.get("resolved_targets", []):
+            elapsed += target["steps"]
+            if target["subtarget_index"] == target["subtarget_count"] - 1:
+                endpoint_steps.add(elapsed)
+        target_observations = []
         for action in chunk:
             if self.remaining() <= 0:
                 halt = True
@@ -349,6 +356,19 @@ class ToolSession:
                     self.window.add(frame, offset)
                 if offset in batch.requested:
                     batch.sampled[offset] = deepcopy(self.observation.current)
+                if executed in endpoint_steps:
+                    tracking = self.actions.feedback(details, self.observation, executed).get(
+                        "tracking"
+                    )
+                    if tracking is not None:
+                        target_observations.append({
+                            **tracking,
+                            "tool_step_offset": executed,
+                            "frame": self.observation.current.index,
+                            "measured_tcp_pose": self.actions.kinematics.pose(
+                                self.observation.current.state[:7]
+                            ),
+                        })
             feedback = dict(result.feedback)
             if result.done:
                 batch.stop_reason, halt = "environment_done", True
@@ -369,5 +389,16 @@ class ToolSession:
                 details, self.observation if result and result.observation else None, executed
             ),
         }
+        if name == "move_ee":
+            receipt["target_observations"] = target_observations
+            self.motion_history.append({
+                "call": batch.call,
+                "tool_index": index,
+                "environment_steps_after": self.steps,
+                "requested_targets": deepcopy(details.get("requested_targets", [])),
+                "target_observations": deepcopy(target_observations),
+                "final_tracking": deepcopy(receipt.get("tracking")),
+            })
+            self.motion_history = self.motion_history[-6:]
         self.log({"event": "execution_outcome", **receipt})
         return receipt, halt

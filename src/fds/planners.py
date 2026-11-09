@@ -126,7 +126,7 @@ class CodexPlanner:
                 "--ephemeral",
                 "--skip-git-repo-check",
                 "--sandbox",
-                "read-only",
+                "workspace-write",
                 "--json",
                 "--model",
                 self.model,
@@ -142,6 +142,8 @@ class CodexPlanner:
                 f'model_provider="{provider}"',
                 "-c",
                 f"model_reasoning_effort={json.dumps(self.effort)}",
+                "-c",
+                'approval_policy="never"',
                 "-c",
                 'web_search="disabled"',
                 "-c",
@@ -266,12 +268,14 @@ class CodexPlanner:
                     {
                         "model": self.model,
                         "effort": self.effort,
+                        "sandbox_mode": "workspace-write",
+                        "approval_policy": "never",
                         "seconds": time.monotonic() - start,
                         "usage": usage,
                     }
                 )
             )
-            return Decision.parse(json.loads(output.read_text()), schema)
+            return Decision.parse_json(output.read_text(), schema)
 
 
 class ResponsesPlanner:
@@ -319,7 +323,7 @@ class ResponsesPlanner:
         )
         if response.status != "completed":
             raise RuntimeError(f"Sys2 response incomplete: {response.status}")
-        return Decision.parse(json.loads(response.output_text), decision_schema(context))
+        return Decision.parse_json(response.output_text, decision_schema(context))
 
     def close(self):
         self.client.close()
@@ -420,7 +424,7 @@ class ChatPlanner:
         message = response.choices[0].message
         if message.tool_calls or not message.content:
             raise RuntimeError("Sys2 must return a JSON decision for the host to execute")
-        return Decision.parse(json.loads(message.content), decision_schema(context))
+        return Decision.parse_json(message.content, decision_schema(context))
 
     def close(self):
         self.client.close()

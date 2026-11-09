@@ -28,6 +28,29 @@ proof of semantic task success: the verdict is `contradicted` for explicit publi
 execution errors and `uncertain` when the command ran but the task outcome is not
 publicly verified. This makes mistakes traceable for later meta-harness diagnosis.
 
+Invalid model decisions are recorded in `audit/call_XXXX/decision_rejection.json`
+and returned as structured feedback on the next planner call. The environment,
+observation window and accepted memory stay unchanged; rejected memory deltas
+and tools are not applied. `task_harness.max_decision_corrections` defaults to 2
+(0 disables correction, maximum 5), and every correction consumes the existing
+episode call budget. Consecutive failures beyond this limit stop with
+`decision_recovery_exhausted`; API and runtime faults still propagate. Episode
+summaries record rejection, correction and recovery counts. The same mechanism
+applies in both ablation modes without adding FDS instructions to contract-off
+requests.
+
+Movement receipts include `target_observations`: measured TCP tracking at each
+fully commanded original waypoint. `recent_motion_history` preserves the last
+six movement receipts across auxiliary requests so repeated tracking errors can
+be inspected. These measurements neither restore old images nor establish object
+motion, contact, event completion or success. Outcome guidance asks the planner
+to verify prerequisites, temporal event order and object alignment using public
+observations before committing to dependent actions.
+
+See [the detailed recovery and experiment change notes](docs/recovery_and_experiment_changes.md)
+and [the train campaign helper templates](scripts/experiments/recovery_train/README.md)
+for budgets, process concurrency, monitoring and validation boundaries.
+
 For the fair ablation baseline, set:
 
 ```toml

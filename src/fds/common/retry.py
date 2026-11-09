@@ -89,6 +89,7 @@ def retry_decision(
     from fds.common.audit import AuditJournal
     from fds.decision import decision_schema
     from fds.planners import make_prompt
+    from fds.task_harness.protocol import DecisionValidationError
 
     directory = Path(directory).resolve()
     directory.mkdir(parents=True, exist_ok=False)
@@ -120,7 +121,9 @@ def retry_decision(
         except BaseException as exc:
             transient = retryable_transport_error(exc)
             record.update(
-                status="transport_error" if transient else "fatal_error",
+                status="transport_error" if transient else (
+                    "decision_rejected" if isinstance(exc, DecisionValidationError) else "fatal_error"
+                ),
                 error_type=type(exc).__name__,
                 error=str(exc),
             )
@@ -174,6 +177,11 @@ def retry_decision(
                 # Keep the partial file and the real request error independently.
                 stats = {}
                 record["stats_error"] = str(exc)
+            usage = stats.get("usage") or {}
+            record["usage_known"] = (
+                usage.get("input_tokens", usage.get("prompt_tokens")) is not None
+                and usage.get("output_tokens", usage.get("completion_tokens")) is not None
+            )
             stats.update(
                 model=model,
                 effort=effort,
@@ -182,7 +190,8 @@ def retry_decision(
                 transport_retries=index,
                 retry_wait_seconds=sum(r.get("retry_wait_seconds", 0) for r in journal["attempts"]),
                 failed_attempt_usage_unknown=sum(
-                    r["status"] != "accepted" for r in journal["attempts"]
+                    r["status"] != "accepted" and not r.get("usage_known", False)
+                    for r in journal["attempts"]
                 ),
             )
             if resumed:

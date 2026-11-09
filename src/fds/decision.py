@@ -13,8 +13,19 @@ def decision_schema(context):
 
 class Decision:
     @classmethod
+    def parse_json(cls, response, schema):
+        from fds.task_harness.protocol import DecisionValidationError
+
+        try:
+            value = json.loads(response)
+        except json.JSONDecodeError as exc:
+            raise DecisionValidationError(
+                str(exc), code="invalid_json", path=[], response=response
+            ) from exc
+        return cls.parse(value, schema)
+
+    @classmethod
     def parse(cls, value, schema=None):
-        json.dumps(value, allow_nan=False)
         if schema is None:
             raise ValueError("FDS decisions require their explicit schema")
         from fds.task_harness.protocol import TaskDecision
