@@ -8,7 +8,6 @@ from pathlib import Path
 from fds.common.audit import AuditJournal
 from fds.common.episode import EpisodeIO
 from fds.support.coordinates import robot_reference
-from fds.support.observation import select_temporal_frames
 from fds.task_harness.actions import TaskActions
 from fds.task_harness.contracts import definitions, execution_contract
 from fds.task_harness.fds import execution_verdict
@@ -18,6 +17,7 @@ from fds.task_harness.observation import (
     deduplicate_image_inputs,
     group_images_by_camera,
     image_inputs,
+    sample_every_third,
 )
 from fds.task_harness.postcheck import OutcomeTracker
 from fds.task_harness.protocol import DecisionValidationError, TaskDecision, schema_for
@@ -34,11 +34,12 @@ class TaskHarness(EpisodeIO):
             raise ValueError("task_harness is a direct Sys2 executor and does not use a VLA")
         opts = deepcopy(options or {})
         self.max_keyframes = opts.pop("max_keyframes", 4)
-        self.demo_frames = opts.pop("demo_frames", 16)
-        self.initial_live_frames = opts.pop("initial_live_frames", 6)
+        # Legacy caps no longer truncate fixed-stride fresh/demo inputs.
+        opts.pop("demo_frames", None)
+        opts.pop("initial_live_frames", None)
         self.max_tool_calls = opts.pop("max_tool_calls", 8)
         self.max_pose_targets = opts.pop("max_pose_targets", 32)
-        self.max_observation_frames = opts.pop("max_observation_frames", 12)
+        self.max_review_frames = opts.pop("max_review_frames", opts.pop("max_observation_frames", 12))
         self.max_decision_corrections = opts.pop("max_decision_corrections", 2)
         self.skills = validate_skills(opts.pop("skills", []))
         self.limits = opts.pop("pose_limits", {})
@@ -60,11 +61,9 @@ class TaskHarness(EpisodeIO):
             raise ValueError(f"Unknown fds options: {sorted(fds_options)}")
         for name, value, low, high in (
             ("max_keyframes", self.max_keyframes, 0, 8),
-            ("demo_frames", self.demo_frames, 1, 32),
-            ("initial_live_frames", self.initial_live_frames, 1, 12),
             ("max_tool_calls", self.max_tool_calls, 1, 16),
             ("max_pose_targets", self.max_pose_targets, 1, 64),
-            ("max_observation_frames", self.max_observation_frames, 1, 32),
+            ("max_review_frames", self.max_review_frames, 1, 32),
             ("max_decision_corrections", self.max_decision_corrections, 0, 5),
         ):
             if type(value) is not int or not low <= value <= high:
@@ -120,12 +119,12 @@ class TaskHarness(EpisodeIO):
             geometry = (
                 self.env.get_robot_geometry() if hasattr(self.env, "get_robot_geometry") else None
             )
-            pending = select_temporal_frames(
-                [f for f in observation.frames if f.cue], self.demo_frames
-            ) + select_temporal_frames(
-                [f for f in observation.frames if not f.cue], self.initial_live_frames
+            pending = sample_every_third(
+                [f for f in observation.frames if f.cue]
+            ) + sample_every_third(
+                [f for f in observation.frames if not f.cue]
             )
-            # Every request includes the latest measured state, even after a rejected action.
+            # Include the initial live state once; subsequent inputs contain only new pixels.
             if observation.current.index not in {f.index for f in pending}:
                 pending.append(observation.current)
             audit.capture(observation.frames, 0)
@@ -142,26 +141,27 @@ class TaskHarness(EpisodeIO):
                 log,
                 max_steps=self.max_steps,
                 max_tool_steps=self.max_tool_steps,
-                max_observation_frames=self.max_observation_frames,
+                max_review_frames=self.max_review_frames,
                 geometry=geometry,
             )
             while calls < self.max_calls and session.remaining() > 0:
                 observation, pending, steps = session.observation, session.pending, session.steps
                 budget = min(self.max_tool_steps, session.remaining())
                 paths, labels = image_inputs(pending, output / "frames")
+                input_window_id = (
+                    session.review_result["requested_window_id"]
+                    if session.phase == "review" and session.review_result else window.window_id
+                )
+                input_window_frames = window.windows.get(input_window_id, {}).get("frames", {})
                 for label in labels:
                     fid = label["frame"]
                     if session.phase == "review":
-                        label["source"] = (
-                            "current_repeat"
-                            if fid == observation.current.index
-                            else "window_review"
-                        )
-                        label["window_id"] = window.window_id
+                        label["source"] = "history_review"
+                        label["window_id"] = input_window_id
                     elif isinstance(fid, str):
                         label["source"] = "training_example"
                     else:
-                        label["source"] = "current_repeat" if fid in session.delivered else "fresh"
+                        label["source"] = "fresh"
                 session.delivered.update(f.index for f in pending)
                 saved_paths, saved_labels = image_inputs(
                     list(memory.frames.values()), output / "frames"
@@ -172,6 +172,8 @@ class TaskHarness(EpisodeIO):
                 labels.extend(saved_labels)
                 paths, labels = deduplicate_image_inputs(paths, labels)
                 paths, labels = group_images_by_camera(paths, labels)
+                # Memory changes in this decision do not retroactively hide supplied images.
+                session.input_frames = {label["frame"] for label in labels}
                 if saved_labels:
                     log({"event": "retained_read", "frame_ids": list(memory.frames)})
                 context = {
@@ -185,11 +187,11 @@ class TaskHarness(EpisodeIO):
                         budget,
                         self.env.action_spec.dim == 8,
                         self.max_pose_targets,
-                        self.max_observation_frames,
+                        self.max_review_frames,
                     ),
                     "max_tool_steps": budget,
                     "max_tool_calls": self.max_tool_calls,
-                    "max_observation_frames": self.max_observation_frames,
+                    "max_review_frames": self.max_review_frames,
                     "execution_contract": execution_contract(
                         actions.limits, contract_mode=self.contract_mode
                     ),
@@ -209,7 +211,7 @@ class TaskHarness(EpisodeIO):
                                         "state": f.state.tolist(),
                                         "tcp_pose": kinematics.pose(f.state[:7]),
                                         **({"calibration": f.calibration} if f.calibration else {}),
-                                        "window_step_offset": window.frames.get(f.index, {}).get(
+                                        "window_step_offset": input_window_frames.get(f.index, {}).get(
                                             "step_offset"
                                         ),
                                     }
@@ -219,17 +221,18 @@ class TaskHarness(EpisodeIO):
                         ],
                         "sampling": session.sampling,
                         "review_window": window.describe(),
+                        "review_windows": window.history(),
                         "review_result": deepcopy(session.review_result),
                         "review_history": {
                             "window_id": window.window_id,
                             "requests": deepcopy(session.review_history),
-                            "meaning": "Metadata of prior review requests in this window. "
+                            "meaning": "Metadata of review requests since the latest environment batch. "
                             "These entries do not restore images or make frame IDs valid "
                             "for task-harness memory citations; the existing provenance rules apply. "
                             "Accepted receipts count requested IDs not previously supplied "
-                            "at request time, excluding automatically appended current frames. "
+                            "at request time. Reviews return exactly the requested frames. "
                             "Same-set and accepted-review counts include this request and only "
-                            "accepted reviews in this window. Previously supplied frames may "
+                            "accepted reviews for the requested window. Previously supplied frames may "
                             "still merit review; these counts do not measure understanding.",
                         },
                     },
@@ -303,8 +306,10 @@ class TaskHarness(EpisodeIO):
                     context["decision_recovery"] = {
                         "previous_rejection": deepcopy(rejection),
                         "instruction": "The previous response was rejected before any tool or "
-                        "memory update. Return a complete corrected decision using the unchanged "
-                        "observations and valid memory. Do not invent evidence or mark unresolved "
+                        "memory update. Return a complete corrected decision using valid memory "
+                        "and supplied images. Previous unretained images are not automatically "
+                        "replayed; request review_frames if their pixels are needed again. "
+                        "Do not invent evidence or mark unresolved "
                         "claims supported just to pass validation. This is not a new physical "
                         "attempt; previous execution feedback remains historical. Each correction "
                         "uses one remaining planner call.",
@@ -375,6 +380,8 @@ class TaskHarness(EpisodeIO):
                         )
                         session.expire(stop)
                         break
+                    session.pending, session.phase = [], "correction"
+                    session.sampling = session.review_result = None
                     continue
                 if rejection is not None:
                     recovered_decisions += 1

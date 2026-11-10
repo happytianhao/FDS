@@ -67,7 +67,7 @@ def test_records_only_measured_original_endpoints(tmp_path, monkeypatch, stop_af
         value = good(context)
         if call == 1:
             value["tool_batch"] = {"kind": "environment", "subgoal": "Move",
-                "observation_steps": [], "tool_calls": [{"name": "move_ee", "arguments": {
+                "tool_calls": [{"name": "move_ee", "arguments": {
                     "targets": [{"position_m": [x, 0, 0], "quaternion_wxyz": [1, 0, 0, 0],
                                  "gripper": "hold", "steps": 2} for x in (2.5, 4.25)],
                 }}]}
@@ -80,7 +80,7 @@ def test_records_only_measured_original_endpoints(tmp_path, monkeypatch, stop_af
             }]}
         else:
             value["tool_batch"] = {"kind": "environment", "subgoal": "Stop",
-                "observation_steps": [], "tool_calls": [{
+                "tool_calls": [{
                     "name": "finish", "arguments": {"reason": "Fixture complete"},
                 }]}
         return value

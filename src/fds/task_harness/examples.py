@@ -5,10 +5,12 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import numpy as np
+from PIL import Image
 
 from fds.benchmarks import benchmark_tasks
 from fds.common.audit import AuditJournal
 from fds.common.paths import workspace_root
+from fds.task_harness.observation import sample_every_third
 
 
 @dataclass
@@ -19,7 +21,7 @@ class TrainingFrame:
 
 
 class TrainingVideo:
-    """Verified training RGB, lazily readable only through the initial review window."""
+    """Verified training RGB, copied losslessly for persistent history review."""
 
     def __init__(self, filename, metadata, record, benchmark, task, episode, max_frames, output):
         import h5py
@@ -54,7 +56,7 @@ class TrainingVideo:
             "episode": episode,
             "goal": self.goal,
             "frame_count": len(self.catalog),
-            "contract": "Extra training video, never current state or current progress. Frame IDs use training:<episode>:<index>. RGB and cue flags only, no oracle actions, subgoals or hidden state. The initial overview may be supplemented using review_frames before the first environment step; afterwards only explicitly retained keyframes remain accessible. Training references always describe demonstration evidence, not this episode's execution.",
+            "contract": "Extra training video, never current state or current progress. Frame IDs use training:<episode>:<index>. RGB and cue flags only, no oracle actions, subgoals or hidden state. All video frames are archived. The first request receives every third frame from the first, plus the final frame. Later requests receive training images only through retained keyframes or explicit review_frames of the initial window. Training references always describe demonstration evidence, not this episode's execution.",
         }
         directory = output / "training_example"
         directory.mkdir()
@@ -62,6 +64,29 @@ class TrainingVideo:
             directory / "source.json",
             {"file": str(filename), "training_metadata": str(metadata), **self.context},
         )
+        # Preserve the complete public video, including frames never sent to Sys2.
+        # Retrieval must not depend on the source dataset still being mounted.
+        (directory / "frames").mkdir()
+        with h5py.File(self.filename, "r") as data:
+            group = self._verified_group(data)
+            for fid, entry in self.catalog.items():
+                step = group[f"timestep_{entry['index']}"]
+                entry["paths"] = {}
+                for camera in ("front", "wrist"):
+                    rgb = np.asarray(step[f"obs/{camera}_rgb"][()])
+                    if rgb.dtype != np.uint8 or rgb.ndim != 3 or rgb.shape[-1] != 3:
+                        raise ValueError("Example RGB must be uint8 [height,width,3]")
+                    path = directory / "frames" / f"{fid.replace(':', '_')}_{camera}.png"
+                    Image.fromarray(rgb).save(path)
+                    entry["paths"][camera] = path
+        if self.file_identity != self._file_identity():
+            raise ValueError("Training example changed while archiving")
+        AuditJournal.write(directory / "frames.json", {
+            fid: {"index": row["index"], "cue": row["cue"],
+                  "images": {camera: str(path.relative_to(directory))
+                             for camera, path in row["paths"].items()}}
+            for fid, row in self.catalog.items()
+        })
 
     @staticmethod
     def _string(value):
@@ -87,35 +112,25 @@ class TrainingVideo:
         return group
 
     def initial(self):
-        ids = list(self.catalog)
-        selected = np.linspace(0, len(ids) - 1, min(self.max_frames, len(ids)), dtype=int)
-        return self.read([ids[i] for i in selected])
+        return self.read(sample_every_third(list(self.catalog)))
 
     def read(self, frame_ids):
-        import h5py
-
         if self.closed:
-            raise ValueError("Training example review window expired")
-        if self.file_identity != self._file_identity():
-            raise ValueError("Training example changed during the episode")
+            raise ValueError("Training example reader is closed")
         if not frame_ids:
             return []
         if any(fid not in self.catalog for fid in frame_ids):
             raise ValueError("Frame is outside the verified training example")
         frames = []
-        with h5py.File(self.filename, "r") as data:
-            group = self._verified_group(data)
-            for fid, entry in self.catalog.items():
-                if fid not in frame_ids:
-                    continue
-                step = group[f"timestep_{entry['index']}"]
-                images = {}
-                for camera in ("front", "wrist"):
-                    rgb = np.asarray(step[f"obs/{camera}_rgb"][()])
-                    if rgb.dtype != np.uint8 or rgb.ndim != 3 or rgb.shape[-1] != 3:
-                        raise ValueError("Example RGB must be uint8 [height,width,3]")
-                    images[camera] = rgb.copy()
-                frames.append(TrainingFrame(fid, images, entry["cue"]))
+        requested = set(frame_ids)
+        for fid, entry in self.catalog.items():
+            if fid not in requested:
+                continue
+            images = {}
+            for camera, path in entry["paths"].items():
+                with Image.open(path) as image:
+                    images[camera] = np.asarray(image).copy()
+            frames.append(TrainingFrame(fid, images, entry["cue"]))
         return frames
 
 

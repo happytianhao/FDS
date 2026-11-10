@@ -19,7 +19,7 @@ def main():
         "tool_definitions": definitions(32, True, 8),
         "max_tool_calls": 8,
         "max_tool_steps": 32,
-        "max_observation_frames": 12,
+        "max_review_frames": 12,
     }
     decision = mock_decision(context)
     parsed = TaskDecision.parse(

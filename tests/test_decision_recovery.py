@@ -64,7 +64,11 @@ def invalid(context, kind="unresolved"):
     elif kind == "schema":
         value["tool_batch"]["observation_steps"] = "invalid"
     elif kind == "batch":
-        value["tool_batch"]["observation_steps"] = [1, 1]
+        value["tool_batch"] = {"kind": "auxiliary", "tool_calls": [{
+            "name": "review_frames", "arguments": {
+                "window_id": "initial", "frame_ids": [0, 0],
+            },
+        }]}
     return value
 
 
@@ -132,8 +136,11 @@ def test_rejection_preserves_state_then_correction_executes(tmp_path, kind):
         "recovered_decisions": 1, "last_rejection": None,
     }
     before, after = planner.inputs[1:]
-    for key in ("memory", "keyframe_memory", "current_frame", "observation", "environment_steps"):
+    for key in ("memory", "keyframe_memory", "current_frame", "environment_steps"):
         assert before[key] == after[key]
+    assert after["observation"]["frames"] == []
+    assert after["observation"]["phase"] == "correction"
+    # The accepted retained keyframe still appears, but unretained inputs do not replay.
     assert planner.images[1] == planner.images[2]
     assert after["remaining_calls"] == 1
     assert after["memory"]["experiences"][0]["id"] == "keep"

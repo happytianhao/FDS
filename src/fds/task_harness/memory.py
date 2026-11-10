@@ -23,7 +23,7 @@ class EpisodicMemory:
 
     def contract(self):
         return {
-            "version": "fds_memory_v1",
+            "version": "fds_memory_v2",
             "limits": deepcopy(LIMITS),
             "max_retained_frames": self.max_frames,
             "capacity": "null means no fixed record-count cap. Objects are uncapped; events and experiences use the listed limits.",
@@ -40,7 +40,7 @@ class EpisodicMemory:
             },
             "object_identity": "IDs refer to stable identities, never reassigned to unrelated objects. Same appearance alone does not prove a match. Record uncertain matches and inferred relations explicitly; alternative identities are not independent confirmed objects. Evidence-backed corrections must preserve affected event references.",
             "events": "Event IDs identify objectives or distinct attempts. Preserve attempt identity when revising an outcome; another physical attempt is a separate event. A zero-step rejection is not a physical occurrence. unknown means unresolved, neither failed nor succeeded. Command completion, disappearance or occlusion alone does not certify a physical outcome.",
-            "keyframes": "save retains or relabels a supplied frame with original pixels, state if available, cue flag and episode/training origin; delete removes it. Saved frames remain historical. Frames still in the active review window may be explicitly reviewed again before acting, even if not previously sampled or no longer retained. Once that window expires, only retained frames remain accessible; audit never restores deleted or unsampled history. A review's requested frames arrive next turn, so they cannot be saved or newly cited until supplied. Selection is explicit and bounded by max_retained_frames, shared across episode and training frames.",
+            "keyframes": "save retains or relabels a supplied frame with original pixels, state if available, cue flag and episode/training origin; retained frames are automatically included in subsequent requests. delete removes automatic retention only, never the permanent archive. Saved frames remain historical. Every archived window, including demonstrations, unsampled frames and deleted keyframes, can be explicitly reviewed throughout the episode. A review's requested frames arrive next turn, so they cannot be saved or newly cited until supplied. An archive listing alone is not evidence. Selection is explicit and bounded by max_retained_frames, shared across episode and training frames.",
             "skills": "Frozen guidance from completed training attempts, read by the model. Applicability is not a host-side selector; guidance may be combined or reconsidered each turn within the contracts. Inventory preferences belong in skills; they do not restrict the available scope choices. Skills cannot override budgets, identity or provenance rules. This response cannot edit skills.",
         }
 
@@ -151,7 +151,7 @@ class EpisodicMemory:
                 }
                 if fid not in available:
                     details["invalid_frame_id"] = fid
-                    error = "Frame not supplied or retained; review the active window first if still available"
+                    error = "Frame not supplied or retained; review its archived window first"
                 elif fid not in self.frames and len(self.frames) >= self.max_frames:
                     error = "Keyframe capacity reached; delete a frame before saving another"
             if error is None:

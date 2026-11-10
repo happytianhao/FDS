@@ -4,6 +4,7 @@ from copy import deepcopy
 from dataclasses import dataclass, field
 
 from fds.task_harness.geometry import check_image_correspondence, project_pixel_to_plane
+from fds.task_harness.observation import sample_every_third
 
 
 @dataclass(frozen=True)
@@ -28,7 +29,6 @@ TOOLS = {
 def validate_batch(batch):
     """Check the declared kind against actual tool effects and sequencing constraints."""
     tool_calls = batch["tool_calls"]
-    observation_steps = batch.get("observation_steps", [])
     if not tool_calls:
         raise ValueError("A Sys2 decision must contain at least one tool call")
     try:
@@ -44,8 +44,6 @@ def validate_batch(batch):
         raise ValueError("Environment and auxiliary tools must be in separate Sys2 decisions")
     if batch["kind"] != specs[0].kind:
         raise ValueError("Batch kind must match the registered tool kind")
-    if not any(s.advances_time for s in specs) and observation_steps:
-        raise ValueError("Tools that do not advance time require observation_steps=[]")
     return specs[0].kind
 
 
@@ -57,9 +55,8 @@ class ToolBatch:
     start_step: int
     start_frame: int
     budget: int
-    requested: set
     receipts: list = field(default_factory=list)
-    sampled: dict = field(default_factory=dict)
+    frame_ids: list = field(default_factory=list)
     actions: list = field(default_factory=list)
     stop_reason: str | None = None
 
@@ -79,15 +76,16 @@ class ToolSession:
         *,
         max_steps,
         max_tool_steps,
-        max_observation_frames,
+        max_review_frames,
         geometry,
     ):
         self.env, self.actions, self.observation, self.pending = env, actions, observation, pending
         self.window, self.audit, self.log = window, audit, log
         self.max_steps, self.max_tool_steps = max_steps, max_tool_steps
-        self.max_observation_frames, self.geometry = max_observation_frames, geometry
+        self.max_review_frames, self.geometry = max_review_frames, geometry
         self.steps, self.status, self.phase = 0, "unknown", "initial"
         self.delivered, self.review_history = set(), []
+        self.input_frames = set()
         self.review_result = self.sampling = self.latest_execution = None
         self.last_result = self.last_environment_result = None
         self.motion_history = []
@@ -103,7 +101,7 @@ class ToolSession:
     def expire(self, reason):
         self.log(
             {
-                "event": "observation_window_expired",
+                "event": "observation_window_closed",
                 "window": self.window.describe(),
                 "reason": reason,
             }
@@ -122,9 +120,9 @@ class ToolSession:
             self.steps,
             self.observation.current.index,
             min(self.max_tool_steps, self.remaining()),
-            set(request.get("observation_steps", [])),
         )
-        self.latest_execution = self.review_result = None
+        self.pending, self.phase = [], "auxiliary" if kind == "auxiliary" else "execution"
+        self.latest_execution = self.review_result = self.sampling = None
         self.batch_counts[kind] += 1
         explicit = sum(
             t["arguments"]["steps"]
@@ -159,16 +157,19 @@ class ToolSession:
                     break
         executed = self.steps - batch.start_step
         if kind == "environment":
-            selected = {f.index: f for _, f in sorted(batch.sampled.items())}
-            selected[self.observation.current.index] = self.observation.current
-            self.pending, self.phase = list(selected.values()), "execution"
+            selected = sample_every_third(batch.frame_ids)
+            if selected:
+                self.pending = self.window.review(self.window.window_id, selected, len(selected))
             self.sampling = {
-                "requested_steps": sorted(batch.requested),
+                "policy": "every_third_plus_final",
+                "stride": 3,
+                "start_position": 0,
+                "new_frame_count": len(batch.frame_ids),
                 "resolved": [
-                    {"step_offset": n, "frame": f.index} for n, f in sorted(batch.sampled.items())
+                    {"step_offset": self.window.frames[fid]["step_offset"], "frame": fid}
+                    for fid in selected
                 ],
-                "unavailable_steps": sorted(batch.requested - batch.sampled.keys()),
-                "final_frame": self.observation.current.index,
+                "final_frame": batch.frame_ids[-1] if batch.frame_ids else None,
                 "executed_steps": executed,
             }
             self.log({"event": "observation_selection", **self.sampling})
@@ -217,11 +218,11 @@ class ToolSession:
             self.pending = self.window.review(
                 arguments["window_id"],
                 arguments["frame_ids"],
-                self.observation.current,
-                self.max_observation_frames,
+                self.max_review_frames,
             )
             requested = set(arguments["frame_ids"])
-            accepted = [r for r in self.review_history if r["status"] == "accepted"]
+            accepted = [r for r in self.review_history if r["status"] == "accepted"
+                        and r["requested_window_id"] == arguments["window_id"]]
             receipt.update(
                 status="accepted",
                 selected_frames=[f.index for f in self.pending],
@@ -231,33 +232,30 @@ class ToolSession:
                 accepted_review_count=len(accepted) + 1,
             )
         except ValueError as exc:
-            self.pending = [self.observation.current]
+            self.pending = []
             receipt.update(
-                status="rejected", error=str(exc), selected_frames=[self.observation.current.index]
+                status="rejected", error=str(exc), selected_frames=[]
             )
         self.phase, self.review_result = "review", deepcopy(receipt)
         self.review_history.append(deepcopy(receipt))
         self.log({"event": "observation_review", **receipt})
         return receipt, receipt["status"] == "rejected"
 
-    def _frame_geometry(self, frame_id, retained, *, active_only=False):
+    def _frame_geometry(self, frame_id, retained, *, window_id=None):
         if type(frame_id) is not int:
             raise ValueError("Geometry requires an episode frame with public calibration")
-        if not active_only and frame_id in retained:
+        if window_id is None and frame_id in retained:
             frame = retained[frame_id]
             return deepcopy(frame.calibration), {
                 c: [im.shape[1], im.shape[0]] for c, im in frame.images.items()
             }
-        return self.window.geometry_metadata(frame_id, self.delivered)
+        return self.window.geometry_metadata(frame_id, self.input_frames, window_id)
 
     def _correspondence(self, tool, batch, retained):
         arguments = tool["arguments"]
-        self.pending, self.phase = [self.observation.current], "auxiliary"
         try:
-            if arguments["window_id"] != self.window.window_id or self.window.window_id is None:
-                raise ValueError("Observation window expired or unknown")
             calibration, sizes = self._frame_geometry(
-                arguments["frame_id"], retained, active_only=True
+                arguments["frame_id"], retained, window_id=arguments["window_id"]
             )
             result = check_image_correspondence(calibration, sizes, arguments)
             return {"status": "accepted", "executed_steps": 0, "result": result}, False
@@ -266,7 +264,6 @@ class ToolSession:
 
     def _project(self, tool, batch, retained):
         arguments = tool["arguments"]
-        self.pending, self.phase = [self.observation.current], "auxiliary"
         results = []
         for index, query in enumerate(arguments["queries"]):
             try:
@@ -294,7 +291,9 @@ class ToolSession:
             }, True
         try:
             chunk, details = self.actions.prepare(
-                tool, self.observation, {f.index: f.cue for f in self.pending}, available, self.log
+                tool, self.observation,
+                {fid: self.window.archive[fid]["cue"] for fid in self.input_frames
+                 if fid in self.window.archive}, available, self.log
             )
         except ValueError as exc:
             receipt = {
@@ -326,7 +325,7 @@ class ToolSession:
                 self.environment_batches += 1
                 self.log(
                     {
-                        "event": "observation_window_expired",
+                        "event": "observation_window_archived",
                         "window": previous,
                         "next_window_id": self.window.window_id,
                     }
@@ -353,9 +352,8 @@ class ToolSession:
                 self.audit.capture(self.observation.frames, self.steps)
                 offset = self.steps - batch.start_step
                 for frame in self.observation.frames:
-                    self.window.add(frame, offset)
-                if offset in batch.requested:
-                    batch.sampled[offset] = deepcopy(self.observation.current)
+                    if self.window.add(frame, offset):
+                        batch.frame_ids.append(frame.index)
                 if executed in endpoint_steps:
                     tracking = self.actions.feedback(details, self.observation, executed).get(
                         "tracking"

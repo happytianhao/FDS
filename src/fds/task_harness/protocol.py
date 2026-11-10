@@ -86,11 +86,6 @@ def schema_for(context):
             ),
             "minItems": 1,
         }
-        if kind == "environment":
-            fields["observation_steps"] = array(
-                {"type": "integer", "minimum": 1, "maximum": context["max_tool_steps"]},
-                context.get("max_observation_frames", 12) - 1,
-            )
         batches.append(obj(**fields))
     memory_changes = {}
     for group, record in RECORDS.items():
@@ -196,10 +191,7 @@ class TaskDecision:
             ) from exc
         # The provider's structured-output schema does not support uniqueItems.
         batch = value["tool_batch"]
-        steps = batch.get("observation_steps", [])
         try:
-            if len(set(steps)) != len(steps):
-                raise ValueError("observation_steps must contain unique relative steps")
             validate_batch(batch)
             reviews = [t for t in batch["tool_calls"] if t["name"] == "review_frames"]
             if reviews:
@@ -258,7 +250,6 @@ def mock_decision(context):
             "kind": "environment",
             "subgoal": "Observe the next state",
             "tool_calls": [{"name": "wait", "arguments": {"steps": 1}}],
-            "observation_steps": [],
         },
         {
             "contract_id": "mock_wait",

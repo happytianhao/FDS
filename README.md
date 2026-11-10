@@ -42,6 +42,29 @@ The full FDS protocol adds `fds_contract` to the normal Sys2 response, alongside
 - required evidence still missing;
 - risk and commitment state.
 
+Environment batches contain `kind`, `subgoal`, and `tool_calls`; Sys2 no longer
+specifies future observation offsets. For both demonstrations and each new
+execution batch, the host samples positions 0, 3, 6, ... and the final frame,
+without duplicating the endpoint. Front and wrist use the same selected times,
+and original frame IDs remain available for citations and tools.
+
+Every request is rebuilt from new observations and explicitly retained keyframes.
+Demonstrations are automatically included only on the first request. Historical
+images enter later inputs only through retained keyframes or `review_frames`;
+auxiliary tools, zero-step rejections and decision corrections do not automatically
+replay the current image. `observation.review_windows` lists all reviewable
+windows, including `initial` and previous execution batches. Review returns exactly
+the requested frames; it does not append the current image.
+
+Complete environment RGB sequences and metadata persist under `observations/`;
+enabled training videos are copied losslessly under `training_example/`.
+These archives survive window changes, keyframe deletion and episode cleanup.
+Per-request inputs remain recorded in `audit/`. Only the public observation/video
+archive is a model retrieval source. `task_harness.max_review_frames` (default 12)
+limits explicit reviews, not fixed-stride demo or fresh inputs. Legacy
+`max_observation_frames` is accepted as an alias for that review limit;
+`demo_frames`, `initial_live_frames`, and `examples.max_frames` no longer cap sampling.
+
 In the default `contract_mode = "full"`, the host validates the contract before
 execution and writes it to `audit/call_XXXX/fds_contract.json`. After the batch,
 FDS records a separate verdict. A successful command receipt is never treated as
@@ -57,8 +80,9 @@ See [the outcome-checking protocol and its limits](docs/fds_postcheck_implementa
 
 Invalid model decisions are recorded in `audit/call_XXXX/decision_rejection.json`
 and returned as structured feedback on the next planner call. The environment,
-observation window and accepted memory stay unchanged; rejected memory deltas
-and tools are not applied. `task_harness.max_decision_corrections` defaults to 2
+observation archive and accepted memory stay unchanged; rejected memory deltas
+and tools are not applied. Corrections receive retained keyframes and can explicitly
+review previous observations if needed. `task_harness.max_decision_corrections` defaults to 2
 (0 disables correction, maximum 5), and every correction consumes the existing
 episode call budget. Consecutive failures beyond this limit stop with
 `decision_recovery_exhausted`. The recommended Plus config separately retries

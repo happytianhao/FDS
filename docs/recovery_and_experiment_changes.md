@@ -6,14 +6,14 @@
 
 涉及 `src/fds/decision.py`、`task_harness/protocol.py`、`task_harness/runtime.py` 和三个真实 planner 后端。
 
-之前，JSON、schema 或 FDS contract 校验异常会直接向上抛出，episode 结束。现在模型输出错误使用 `DecisionValidationError`，包含 `code`、`path`、`message` 和原始 `rejected_response`。覆盖无效 JSON、非有限数值、schema、批次结构、重复观测步、重复 review frame ID，以及 contract 引用/前置条件错误。无效 schema 本身、普通程序错误和 API 故障不伪装为决策错误。
+之前，JSON、schema 或 FDS contract 校验异常会直接向上抛出，episode 结束。现在模型输出错误使用 `DecisionValidationError`，包含 `code`、`path`、`message` 和原始 `rejected_response`。覆盖无效 JSON、非有限数值、schema、批次结构、重复 review frame ID，以及 contract 引用/前置条件错误。未来采样字段 `observation_steps` 已移除，继续输出该字段也会被 schema 拒绝。无效 schema 本身、普通程序错误和 API 故障不伪装为决策错误。
 
 执行顺序是：
 
 1. 获取响应并严格校验。
 2. 若被拒绝，写入 `audit/call_XXXX/decision_rejection.json` 及 trace。
 3. 保持当前环境、观测窗口、已接受 memory 和 keyframes；不执行被拒绝响应中的工具或 memory 修改。
-4. 下次正常 planner 调用通过 `decision_recovery.previous_rejection` 收到错误与原响应，使用同一批观测生成完整替代决策。
+4. 下次正常 planner 调用通过 `decision_recovery.previous_rejection` 收到错误与原响应。纠正轮只自动输入已保留关键帧，不重放未保留的旧观测；需要旧画面时，可先调用 `review_frames`，收到图片后再生成完整替代决策。环境与已接受的记忆仍保持不变。
 5. 纠正通过后恢复正常执行，并记录 `decision_recovery.json`；连续纠正耗尽则结束。
 
 `task_harness.max_decision_corrections` 默认 2，允许 0–5。默认情况下，一次初始非法响应后最多再发两次纠正请求；总计连续三次非法响应后 `stop_reason=decision_recovery_exhausted`。所有纠正都占原有 `max_calls`，若先耗尽总调用预算则为 `budget_exhausted`。有效决策会重置连续错误计数。

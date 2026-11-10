@@ -1,13 +1,23 @@
-"""One expiring public-observation window, separate from retained memory and audit."""
+"""Persistent public observations, with explicit history review and fresh-only delivery."""
 
+import json
 from copy import deepcopy
 from pathlib import Path
-from tempfile import TemporaryDirectory
 
 import numpy as np
 from PIL import Image
 
 from fds.types import Frame
+
+
+def sample_every_third(items):
+    """Select positions 0, 3, 6, ... and the final item, without a duplicate endpoint."""
+    if not items:
+        return []
+    selected = list(items[::3])
+    if (len(items) - 1) % 3:
+        selected.append(items[-1])
+    return selected
 
 
 def group_images_by_camera(paths, labels):
@@ -64,68 +74,93 @@ def image_inputs(frames, directory):
 
 
 class ObservationWindow:
-    """Disk-backed RGB snapshots; never reads prior input files or human audit."""
+    """Persistent RGB archive with an active batch and addressable historical windows.
+
+    Only this public-sensor archive is a retrieval source. Audit files and previous
+    model inputs remain separate. Closing a window or episode never deletes pixels.
+    """
 
     def __init__(self, output):
-        self.storage = TemporaryDirectory(prefix="observation-window-", dir=output)
-        self.directory = Path(self.storage.name)
+        self.directory = Path(output) / "observations"
+        (self.directory / "frames").mkdir(parents=True)
         self.frames = {}
+        self.windows = {}
+        self.archive = {}
         self.example = None
         self.window_id = self.kind = None
 
     def begin(self, window_id, kind):
+        if window_id in self.windows:
+            raise ValueError("Observation window IDs must be unique")
         self.expire()
         self.window_id, self.kind = window_id, kind
+        self.windows[window_id] = {"kind": kind, "frames": self.frames}
+        self._record("windows", {"window_id": window_id, "kind": kind})
 
     def expire(self):
-        # Delete only files created in this private, episode-scoped directory.
-        for path in self.directory.iterdir():
-            path.unlink()
-        self.frames.clear()
-        if self.example is not None:
-            self.example.close()
-        self.example = None
+        # End active selection only; historical windows and files remain available.
+        self.frames = {}
         self.window_id = self.kind = None
 
     def close(self):
-        self.frames.clear()
+        from fds.common.audit import AuditJournal
+
+        AuditJournal.write(self.directory / "index.json", {"windows": self.history()})
+        self.expire()
         if self.example is not None:
             self.example.close()
-        self.example = None
-        self.window_id = self.kind = None
-        self.storage.cleanup()
+
+    def _record(self, name, value):
+        with (self.directory / f"{name}.jsonl").open("a") as stream:
+            stream.write(json.dumps(value, ensure_ascii=False, allow_nan=False) + "\n")
 
     def add(self, frame, step_offset=None):
+        if self.window_id is None:
+            raise ValueError("Begin an observation window before adding frames")
         if frame.index in self.frames:
-            return
-        paths = {}
-        for index, (camera, rgb) in enumerate(frame.images.items()):
-            path = self.directory / f"{len(self.frames)}_{index}.png"
-            Image.fromarray(rgb).save(path)
-            paths[camera] = path
-        self.frames[frame.index] = {
-            "paths": paths,
-            "image_sizes": {
-                camera: [rgb.shape[1], rgb.shape[0]] for camera, rgb in frame.images.items()
-            },
-            "state": frame.state.copy(),
-            "cue": frame.cue,
-            "calibration": deepcopy(frame.calibration),
-            "step_offset": step_offset,
-        }
+            return False
+        fresh = frame.index not in self.archive
+        if fresh:
+            paths = {}
+            for index, (camera, rgb) in enumerate(frame.images.items()):
+                path = self.directory / "frames" / f"frame_{frame.index:06d}_{index}.png"
+                Image.fromarray(rgb).save(path)
+                paths[camera] = path
+            self.archive[frame.index] = {
+                "paths": paths,
+                "image_sizes": {
+                    camera: [rgb.shape[1], rgb.shape[0]] for camera, rgb in frame.images.items()
+                },
+                "state": frame.state.copy(),
+                "cue": frame.cue,
+                "calibration": deepcopy(frame.calibration),
+            }
+        row = {**self.archive[frame.index], "step_offset": step_offset}
+        self.frames[frame.index] = row
+        self._record("frames", {
+            "window_id": self.window_id, "frame": frame.index, "step_offset": step_offset,
+            "images": {camera: str(path.relative_to(self.directory))
+                       for camera, path in row["paths"].items()},
+            "image_sizes": row["image_sizes"], "state": row["state"].tolist(),
+            "cue": row["cue"], "calibration": row["calibration"],
+        })
+        return fresh
 
-    def geometry_metadata(self, frame_id, delivered):
-        """Only already-delivered, live-window metadata; no image retrieval or new evidence."""
-        if self.window_id is None or frame_id not in self.frames:
-            raise ValueError("Geometry frame is outside the active observation window")
+    def geometry_metadata(self, frame_id, delivered, window_id=None):
+        """Only frames visible in this request; historical pixels require explicit review."""
+        frames = self.archive if window_id is None else self.windows.get(window_id, {}).get("frames", {})
+        if frame_id not in frames:
+            raise ValueError("Geometry frame is outside the specified observation archive/window")
         if frame_id not in delivered:
-            raise ValueError("Geometry frame has not been supplied; review it first")
-        row = self.frames[frame_id]
+            raise ValueError("Geometry frame is not supplied in this request; review it first")
+        row = frames[frame_id]
         return deepcopy(row["calibration"]), deepcopy(row["image_sizes"])
 
-    def describe(self):
-        entries = [(fid, row["cue"], row["step_offset"]) for fid, row in self.frames.items()]
-        if self.example is not None:
+    def describe(self, window_id=None):
+        window_id = self.window_id if window_id is None else window_id
+        window = self.windows.get(window_id, {})
+        entries = [(fid, row["cue"], row["step_offset"]) for fid, row in window.get("frames", {}).items()]
+        if window_id == "initial" and self.example is not None:
             entries.extend((fid, row["cue"], None) for fid, row in self.example.catalog.items())
         ranges, previous = [], None
         for fid, cue, offset in entries:
@@ -146,26 +181,31 @@ class ObservationWindow:
                 ranges[-1].update(last_frame=fid, last_step_offset=offset)
             previous = (prefix, index, cue)
         return {
-            "window_id": self.window_id,
-            "kind": self.kind,
+            "window_id": window_id,
+            "kind": window.get("kind"),
             "frame_count": len(entries),
             "frame_ranges": ranges,
         }
 
-    def review(self, window_id, frame_ids, current, budget):
-        if window_id != self.window_id or self.window_id is None:
-            raise ValueError("Observation window expired or unknown; use the current window_id")
+    def history(self):
+        return [self.describe(window_id) for window_id in self.windows]
+
+    def review(self, window_id, frame_ids, budget):
+        if window_id not in self.windows:
+            raise ValueError("Unknown observation window; use observation.review_windows")
         if len(frame_ids) != len(set(frame_ids)):
             raise ValueError("Review frame IDs must be unique")
-        if len(set(frame_ids) | {current.index}) > budget:
-            raise ValueError("Review exceeds the frame budget including the mandatory final frame")
-        examples = self.example.catalog if self.example is not None else {}
-        missing = [fid for fid in frame_ids if fid not in self.frames and fid not in examples]
+        if len(frame_ids) > budget:
+            raise ValueError("Review exceeds max_review_frames")
+        frames = self.windows[window_id]["frames"]
+        examples = self.example.catalog if window_id == "initial" and self.example is not None else {}
+        missing = [fid for fid in frame_ids if fid not in frames and fid not in examples]
         if missing:
-            raise ValueError(f"Frames are outside the active observation window: {missing}")
+            raise ValueError(f"Frames are outside the specified observation window: {missing}")
         selected = []
-        for fid, row in self.frames.items():
-            if fid not in frame_ids or fid == current.index:
+        requested = set(frame_ids)
+        for fid, row in frames.items():
+            if fid not in requested:
                 continue
             images = {}
             for camera, path in row["paths"].items():
@@ -174,7 +214,6 @@ class ObservationWindow:
             selected.append(
                 Frame(fid, images, row["state"].copy(), row["cue"], deepcopy(row["calibration"]))
             )
-        if self.example is not None:
+        if examples:
             selected.extend(self.example.read([fid for fid in frame_ids if fid in examples]))
-        selected.append(current)
         return selected

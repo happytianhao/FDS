@@ -57,7 +57,7 @@ def test_contract_off_removes_fds_schema_and_execution_rules():
         "tool_definitions": definitions(8, True, 4),
         "max_tool_calls": 8,
         "max_tool_steps": 8,
-        "max_observation_frames": 4,
+        "max_review_frames": 4,
     }
     schema = schema_for(context)
     assert "fds_contract" not in schema["properties"]

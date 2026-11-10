@@ -43,7 +43,7 @@ def reviewed_finish(context, status="succeeded"):
     row.update(status=status, evidence_frames=[context["current_frame"]], progress="Reviewed")
     value["memory_changes"]["events"] = [{"op": "upsert", "record": row}]
     value["tool_batch"] = {"kind": "environment", "subgoal": "Stop honestly",
-                           "observation_steps": [], "tool_calls": [{
+                           "tool_calls": [{
                                "name": "finish", "arguments": {"reason": "End fixture"},
                            }]}
     return value
@@ -88,10 +88,21 @@ def test_review_updates_event_and_binds_exact_action(tmp_path):
     "wrong_binding", "stale_dependency", "unknown_dependency", "missing_memory_update",
     "rejected_memory_update", "changed_criterion", "contradictory_success", "omitted_falsifier",
 ])
-def test_bad_review_is_atomic_and_bounded_correction_uses_same_observation(tmp_path, damage):
+def test_bad_review_is_atomic_and_correction_explicitly_reviews_previous_observation(tmp_path, damage):
     def respond(context, call):
         if call == 1:
             return start_event(context)
+        if call == 3:
+            value = reviewed_finish(context, "unknown")
+            for check in value["fds_contract"]["outcome_review"]["checks"]:
+                check["evidence_refs"] = []
+            value["memory_changes"]["events"][0]["record"]["evidence_frames"] = [0]
+            value["tool_batch"] = {"kind": "auxiliary", "tool_calls": [{
+                "name": "review_frames", "arguments": {
+                    "window_id": "batch_0001", "frame_ids": [context["current_frame"]],
+                },
+            }]}
+            return value
         value = reviewed_finish(context)
         if call != 2:
             return value
@@ -128,15 +139,17 @@ def test_bad_review_is_atomic_and_bounded_correction_uses_same_observation(tmp_p
             review["event_resolutions"][0]["check_ids"].pop()
         return value
 
-    env, planner, out, summary = execute(tmp_path, respond)
-    assert env.steps == 1 and summary["planner_calls"] == 3
+    env, planner, out, summary = execute(tmp_path, respond, calls=4)
+    assert env.steps == 1 and summary["planner_calls"] == 4
     assert summary["decision_recovery"]["rejected_decisions"] == 1
     assert summary["decision_recovery"]["recovered_decisions"] == 1
-    assert summary["outcome_tracking"]["reviews"] == 1
+    assert summary["outcome_tracking"]["reviews"] == 2
     for key in ("memory", "keyframe_memory", "pending_outcome_review", "event_memory_versions",
-                "environment_steps", "observation"):
+                "environment_steps"):
         assert planner.inputs[1][key] == planner.inputs[2][key]
-    assert planner.images[1] == planner.images[2]
+    assert planner.inputs[2]["observation"]["frames"] == []
+    assert planner.inputs[2]["available_evidence_frames"] == [0]
+    assert planner.images[1] == planner.images[3]
     audit = out / "audit/call_0001"
     assert json.loads((audit / "before.json").read_text()) == json.loads((audit / "after.json").read_text())
     assert not (out / "memory_versions/call_0001.json").exists()
@@ -205,7 +218,7 @@ def test_unknown_event_deleted_during_auxiliary_is_not_resurrected(tmp_path):
             }]}
         else:
             value["tool_batch"] = {"kind": "environment", "subgoal": "Stop",
-                                   "observation_steps": [], "tool_calls": [{
+                                   "tool_calls": [{
                                        "name": "finish", "arguments": {"reason": "Unknown outcome"},
                                    }]}
         return value
@@ -231,7 +244,7 @@ def test_confirmed_event_is_not_counted_again_during_auxiliary_review(tmp_path):
             }]}
         else:
             value["tool_batch"] = {"kind": "environment", "subgoal": "Stop",
-                                   "observation_steps": [], "tool_calls": [{
+                                   "tool_calls": [{
                                        "name": "finish", "arguments": {"reason": "Done"},
                                    }]}
             value["fds_contract"]["action_binding"]["event_dependencies"] = [
@@ -245,7 +258,7 @@ def test_confirmed_event_is_not_counted_again_during_auxiliary_review(tmp_path):
     assert planner.inputs[2]["pending_outcome_review"]["event_ids"] == []
 
 
-def test_unchanged_prior_assessment_survives_expired_pixels_without_new_citation_rights(tmp_path):
+def test_unchanged_prior_assessment_survives_archived_pixels_without_new_citation_rights(tmp_path):
     def respond(context, call):
         if call == 1:
             return start_event(context)
