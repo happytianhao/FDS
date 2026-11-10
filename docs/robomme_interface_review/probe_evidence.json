@@ -1,0 +1,2632 @@
+{
+  "swing_original": [
+    {
+      "status": "ongoing",
+      "execution_control_steps": 50,
+      "remaining_steps": 1113,
+      "turn": 0,
+      "action": [
+        0.025,
+        0.085,
+        0.09,
+        -3.1416,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "terminated": false,
+      "truncated": false,
+      "evaluator_only_hidden_state": {
+        "swing_count": 0,
+        "swing_over_limit": false,
+        "target_cube_xyz": [
+          0.022361429408192635,
+          0.08313572406768799,
+          0.019999921321868896
+        ],
+        "target_right_xyz": [
+          -0.10951298475265503,
+          -0.21231338381767273,
+          0.004999999888241291
+        ],
+        "target_left_xyz": [
+          -0.10386426001787186,
+          0.15705180168151855,
+          0.004999999888241291
+        ]
+      },
+      "tcp_after": [
+        0.007810148410499096,
+        0.08515535295009613,
+        0.08943501114845276,
+        -3.1390891075134277,
+        0.0029480494558811188,
+        0.0012453198432922363
+      ]
+    },
+    {
+      "status": "ongoing",
+      "execution_control_steps": 78,
+      "remaining_steps": 1085,
+      "turn": 1,
+      "action": [
+        0.02,
+        0.082,
+        0.02,
+        -3.1416,
+        0.0,
+        0.0,
+        -1.0
+      ],
+      "terminated": false,
+      "truncated": false,
+      "evaluator_only_hidden_state": {
+        "swing_count": 0,
+        "swing_over_limit": false,
+        "target_cube_xyz": [
+          0.02250571735203266,
+          0.08114542067050934,
+          0.02016521617770195
+        ],
+        "target_right_xyz": [
+          -0.10951298475265503,
+          -0.21231338381767273,
+          0.004999999888241291
+        ],
+        "target_left_xyz": [
+          -0.10386426001787186,
+          0.15705180168151855,
+          0.004999999888241291
+        ]
+      },
+      "tcp_after": [
+        0.017780963331460953,
+        0.08218242228031158,
+        0.01659981906414032,
+        -3.139432191848755,
+        0.003366474062204361,
+        0.0013230443000793457
+      ]
+    },
+    {
+      "status": "ongoing",
+      "execution_control_steps": 97,
+      "remaining_steps": 1066,
+      "turn": 2,
+      "action": [
+        0.018,
+        0.082,
+        0.12,
+        -3.1416,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "terminated": false,
+      "truncated": false,
+      "evaluator_only_hidden_state": {
+        "swing_count": 0,
+        "swing_over_limit": false,
+        "target_cube_xyz": [
+          0.02035936526954174,
+          0.08152904361486435,
+          0.11852536350488663
+        ],
+        "target_right_xyz": [
+          -0.10951298475265503,
+          -0.21231338381767273,
+          0.004999999888241291
+        ],
+        "target_left_xyz": [
+          -0.10386426001787186,
+          0.15705180168151855,
+          0.004999999888241291
+        ]
+      },
+      "tcp_after": [
+        0.015650562942028046,
+        0.08257246017456055,
+        0.11495617032051086,
+        -3.139256000518799,
+        0.0005657710134983063,
+        0.0014944672584533691
+      ]
+    },
+    {
+      "status": "ongoing",
+      "execution_control_steps": 136,
+      "remaining_steps": 1027,
+      "turn": 3,
+      "action": [
+        -0.113,
+        -0.216,
+        0.12,
+        -3.1416,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "terminated": false,
+      "truncated": false,
+      "evaluator_only_hidden_state": {
+        "swing_count": 0,
+        "swing_over_limit": false,
+        "target_cube_xyz": [
+          -0.11903940141201019,
+          -0.21202372014522552,
+          0.1227896437048912
+        ],
+        "target_right_xyz": [
+          -0.10951298475265503,
+          -0.21231338381767273,
+          0.004999999888241291
+        ],
+        "target_left_xyz": [
+          -0.10386426001787186,
+          0.15705180168151855,
+          0.004999999888241291
+        ]
+      },
+      "tcp_after": [
+        -0.12374496459960938,
+        -0.21095894277095795,
+        0.11922205984592438,
+        -3.1377177238464355,
+        0.0005505122244358063,
+        -0.0023259520530700684
+      ]
+    },
+    {
+      "status": "ongoing",
+      "execution_control_steps": 176,
+      "remaining_steps": 987,
+      "turn": 4,
+      "action": [
+        -0.113,
+        0.16,
+        0.12,
+        -3.1416,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "terminated": false,
+      "truncated": false,
+      "evaluator_only_hidden_state": {
+        "swing_count": 0,
+        "swing_over_limit": false,
+        "target_cube_xyz": [
+          -0.12272461503744125,
+          0.15773043036460876,
+          0.12233483791351318
+        ],
+        "target_right_xyz": [
+          -0.10951298475265503,
+          -0.21231338381767273,
+          0.004999999888241291
+        ],
+        "target_left_xyz": [
+          -0.10386426001787186,
+          0.15705180168151855,
+          0.004999999888241291
+        ]
+      },
+      "tcp_after": [
+        -0.12743239104747772,
+        0.15878085792064667,
+        0.11876820027828217,
+        -3.1379551887512207,
+        0.0006897486746311188,
+        0.000444948673248291
+      ]
+    },
+    {
+      "status": "ongoing",
+      "execution_control_steps": 214,
+      "remaining_steps": 949,
+      "turn": 5,
+      "action": [
+        -0.113,
+        -0.216,
+        0.12,
+        -3.1416,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "terminated": false,
+      "truncated": false,
+      "evaluator_only_hidden_state": {
+        "swing_count": 0,
+        "swing_over_limit": false,
+        "target_cube_xyz": [
+          -0.12281958013772964,
+          -0.2164573222398758,
+          0.12366556376218796
+        ],
+        "target_right_xyz": [
+          -0.10951298475265503,
+          -0.21231338381767273,
+          0.004999999888241291
+        ],
+        "target_left_xyz": [
+          -0.10386426001787186,
+          0.15705180168151855,
+          0.004999999888241291
+        ]
+      },
+      "tcp_after": [
+        -0.1275242418050766,
+        -0.21538804471492767,
+        0.12009820342063904,
+        -3.138441801071167,
+        0.0007424391806125641,
+        -0.0034381747245788574
+      ]
+    },
+    {
+      "status": "ongoing",
+      "execution_control_steps": 252,
+      "remaining_steps": 911,
+      "turn": 6,
+      "action": [
+        -0.113,
+        0.16,
+        0.12,
+        -3.1416,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "terminated": false,
+      "truncated": false,
+      "evaluator_only_hidden_state": {
+        "swing_count": 0,
+        "swing_over_limit": false,
+        "target_cube_xyz": [
+          -0.12317269295454025,
+          0.1558169424533844,
+          0.12240380793809891
+        ],
+        "target_right_xyz": [
+          -0.10951298475265503,
+          -0.21231338381767273,
+          0.004999999888241291
+        ],
+        "target_left_xyz": [
+          -0.10386426001787186,
+          0.15705180168151855,
+          0.004999999888241291
+        ]
+      },
+      "tcp_after": [
+        -0.12788110971450806,
+        0.15686576068401337,
+        0.11883696913719177,
+        -3.1385860443115234,
+        0.0008609332144260406,
+        0.00011116266250610352
+      ]
+    },
+    {
+      "status": "ongoing",
+      "execution_control_steps": 290,
+      "remaining_steps": 873,
+      "turn": 7,
+      "action": [
+        -0.113,
+        -0.216,
+        0.12,
+        -3.1416,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "terminated": false,
+      "truncated": false,
+      "evaluator_only_hidden_state": {
+        "swing_count": 0,
+        "swing_over_limit": false,
+        "target_cube_xyz": [
+          -0.12271541357040405,
+          -0.2170676589012146,
+          0.12347700446844101
+        ],
+        "target_right_xyz": [
+          -0.10951298475265503,
+          -0.21231338381767273,
+          0.004999999888241291
+        ],
+        "target_left_xyz": [
+          -0.10386426001787186,
+          0.15705180168151855,
+          0.004999999888241291
+        ]
+      },
+      "tcp_after": [
+        -0.1274203658103943,
+        -0.2159995436668396,
+        0.11990991979837418,
+        -3.1391286849975586,
+        0.0009315051138401031,
+        -0.0037559866905212402
+      ]
+    },
+    {
+      "status": "ongoing",
+      "execution_control_steps": 328,
+      "remaining_steps": 835,
+      "turn": 8,
+      "action": [
+        -0.113,
+        0.16,
+        0.12,
+        -3.1416,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "terminated": false,
+      "truncated": false,
+      "evaluator_only_hidden_state": {
+        "swing_count": 0,
+        "swing_over_limit": false,
+        "target_cube_xyz": [
+          -0.1232348307967186,
+          0.15548793971538544,
+          0.12245479971170425
+        ],
+        "target_right_xyz": [
+          -0.10951298475265503,
+          -0.21231338381767273,
+          0.004999999888241291
+        ],
+        "target_left_xyz": [
+          -0.10386426001787186,
+          0.15705180168151855,
+          0.004999999888241291
+        ]
+      },
+      "tcp_after": [
+        -0.12794336676597595,
+        0.1565355360507965,
+        0.11888854950666428,
+        -3.1393041610717773,
+        0.0010490454733371735,
+        -0.00017875432968139648
+      ]
+    },
+    {
+      "status": "ongoing",
+      "execution_control_steps": 366,
+      "remaining_steps": 797,
+      "turn": 9,
+      "action": [
+        -0.113,
+        -0.216,
+        0.12,
+        -3.1416,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "terminated": false,
+      "truncated": false,
+      "evaluator_only_hidden_state": {
+        "swing_count": 0,
+        "swing_over_limit": false,
+        "target_cube_xyz": [
+          -0.1226424127817154,
+          -0.21729819476604462,
+          0.1232733428478241
+        ],
+        "target_right_xyz": [
+          -0.10951298475265503,
+          -0.21231338381767273,
+          0.004999999888241291
+        ],
+        "target_left_xyz": [
+          -0.10386426001787186,
+          0.15705180168151855,
+          0.004999999888241291
+        ]
+      },
+      "tcp_after": [
+        -0.12734784185886383,
+        -0.2162313610315323,
+        0.11970619112253189,
+        -3.1398770809173584,
+        0.0011284388601779938,
+        -0.00403064489364624
+      ]
+    },
+    {
+      "status": "ongoing",
+      "execution_control_steps": 404,
+      "remaining_steps": 759,
+      "turn": 10,
+      "action": [
+        -0.113,
+        0.16,
+        0.12,
+        -3.1416,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "terminated": false,
+      "truncated": false,
+      "evaluator_only_hidden_state": {
+        "swing_count": 0,
+        "swing_over_limit": false,
+        "target_cube_xyz": [
+          -0.12327577918767929,
+          0.15536056458950043,
+          0.12251657992601395
+        ],
+        "target_right_xyz": [
+          -0.10951298475265503,
+          -0.21231338381767273,
+          0.004999999888241291
+        ],
+        "target_left_xyz": [
+          -0.10386426001787186,
+          0.15705180168151855,
+          0.004999999888241291
+        ]
+      },
+      "tcp_after": [
+        -0.12798497080802917,
+        0.15640665590763092,
+        0.11895005404949188,
+        -3.1400809288024902,
+        0.001247171312570572,
+        -0.000440061092376709
+      ]
+    },
+    {
+      "status": "ongoing",
+      "execution_control_steps": 442,
+      "remaining_steps": 721,
+      "turn": 11,
+      "action": [
+        -0.113,
+        -0.216,
+        0.12,
+        -3.1416,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "terminated": false,
+      "truncated": false,
+      "evaluator_only_hidden_state": {
+        "swing_count": 0,
+        "swing_over_limit": false,
+        "target_cube_xyz": [
+          -0.12257768958806992,
+          -0.21740961074829102,
+          0.12305587530136108
+        ],
+        "target_right_xyz": [
+          -0.10951298475265503,
+          -0.21231338381767273,
+          0.004999999888241291
+        ],
+        "target_left_xyz": [
+          -0.10386426001787186,
+          0.15705180168151855,
+          0.004999999888241291
+        ]
+      },
+      "tcp_after": [
+        -0.12728340923786163,
+        -0.21634447574615479,
+        0.11948887258768082,
+        -3.14068341255188,
+        0.001333717256784439,
+        -0.0042778849601745605
+      ]
+    },
+    {
+      "status": "ongoing",
+      "execution_control_steps": 480,
+      "remaining_steps": 683,
+      "turn": 12,
+      "action": [
+        -0.113,
+        0.16,
+        0.12,
+        -3.1416,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "terminated": false,
+      "truncated": false,
+      "evaluator_only_hidden_state": {
+        "swing_count": 0,
+        "swing_over_limit": false,
+        "target_cube_xyz": [
+          -0.12330636382102966,
+          0.15530788898468018,
+          0.12258649617433548
+        ],
+        "target_right_xyz": [
+          -0.10951298475265503,
+          -0.21231338381767273,
+          0.004999999888241291
+        ],
+        "target_left_xyz": [
+          -0.10386426001787186,
+          0.15705180168151855,
+          0.004999999888241291
+        ]
+      },
+      "tcp_after": [
+        -0.12801596522331238,
+        0.1563519686460495,
+        0.11902002990245819,
+        -3.140916347503662,
+        0.0014522112905979156,
+        -0.0006746649742126465
+      ]
+    },
+    {
+      "status": "ongoing",
+      "execution_control_steps": 518,
+      "remaining_steps": 645,
+      "turn": 13,
+      "action": [
+        -0.113,
+        -0.216,
+        0.12,
+        -3.1416,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "terminated": false,
+      "truncated": false,
+      "evaluator_only_hidden_state": {
+        "swing_count": 0,
+        "swing_over_limit": false,
+        "target_cube_xyz": [
+          -0.12251637876033783,
+          -0.217473566532135,
+          0.12282656878232956
+        ],
+        "target_right_xyz": [
+          -0.10951298475265503,
+          -0.21231338381767273,
+          0.004999999888241291
+        ],
+        "target_left_xyz": [
+          -0.10386426001787186,
+          0.15705180168151855,
+          0.004999999888241291
+        ]
+      },
+      "tcp_after": [
+        -0.12722289562225342,
+        -0.21641050279140472,
+        0.11925963312387466,
+        -3.1415493488311768,
+        0.001545194536447525,
+        -0.004500091075897217
+      ]
+    },
+    {
+      "status": "ongoing",
+      "execution_control_steps": 556,
+      "remaining_steps": 607,
+      "turn": 14,
+      "action": [
+        -0.113,
+        0.16,
+        0.12,
+        -3.1416,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "terminated": false,
+      "truncated": false,
+      "evaluator_only_hidden_state": {
+        "swing_count": 0,
+        "swing_over_limit": false,
+        "target_cube_xyz": [
+          -0.12332932651042938,
+          0.1552906185388565,
+          0.12266653776168823
+        ],
+        "target_right_xyz": [
+          -0.10951298475265503,
+          -0.21231338381767273,
+          0.004999999888241291
+        ],
+        "target_left_xyz": [
+          -0.10386426001787186,
+          0.15705180168151855,
+          0.004999999888241291
+        ]
+      },
+      "tcp_after": [
+        -0.12803949415683746,
+        0.15633279085159302,
+        0.11910025775432587,
+        -3.1418118476867676,
+        0.0016620196402072906,
+        -0.0008849501609802246
+      ]
+    },
+    {
+      "status": "ongoing",
+      "execution_control_steps": 584,
+      "remaining_steps": 579,
+      "turn": 15,
+      "action": [
+        -0.113,
+        0.16,
+        0.02,
+        -3.1416,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "terminated": false,
+      "truncated": false,
+      "evaluator_only_hidden_state": {
+        "swing_count": 1,
+        "swing_over_limit": false,
+        "target_cube_xyz": [
+          -0.11288494616746902,
+          0.157325878739357,
+          0.019999945536255836
+        ],
+        "target_right_xyz": [
+          -0.10951298475265503,
+          -0.21231338381767273,
+          0.004999999888241291
+        ],
+        "target_left_xyz": [
+          -0.10386426001787186,
+          0.15705180168151855,
+          0.004999999888241291
+        ]
+      },
+      "tcp_after": [
+        -0.11709365248680115,
+        0.15844275057315826,
+        0.01933114230632782,
+        -3.1428117752075195,
+        0.004496339708566666,
+        -0.00020378828048706055
+      ]
+    },
+    {
+      "status": "ongoing",
+      "execution_control_steps": 606,
+      "remaining_steps": 557,
+      "turn": 16,
+      "action": [
+        -0.117,
+        0.158,
+        0.12,
+        -3.1416,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "terminated": false,
+      "truncated": false,
+      "evaluator_only_hidden_state": {
+        "swing_count": 1,
+        "swing_over_limit": false,
+        "target_cube_xyz": [
+          -0.11288440972566605,
+          0.15732577443122864,
+          0.019999947398900986
+        ],
+        "target_right_xyz": [
+          -0.10951298475265503,
+          -0.21231338381767273,
+          0.004999999888241291
+        ],
+        "target_left_xyz": [
+          -0.10386426001787186,
+          0.15705180168151855,
+          0.004999999888241291
+        ]
+      },
+      "tcp_after": [
+        -0.11930816620588303,
+        0.1574283391237259,
+        0.1160050630569458,
+        -3.1430506706237793,
+        0.0023448504507541656,
+        0.0013499855995178223
+      ]
+    },
+    {
+      "status": "ongoing",
+      "execution_control_steps": 637,
+      "remaining_steps": 526,
+      "turn": 17,
+      "action": [
+        -0.25,
+        0.19,
+        0.1,
+        -3.1416,
+        0.0,
+        0.0,
+        -1.0
+      ],
+      "terminated": false,
+      "truncated": false,
+      "evaluator_only_hidden_state": {
+        "swing_count": 1,
+        "swing_over_limit": false,
+        "target_cube_xyz": [
+          -0.11288440972566605,
+          0.15732575953006744,
+          0.019999945536255836
+        ],
+        "target_right_xyz": [
+          -0.10951298475265503,
+          -0.21231338381767273,
+          0.004999999888241291
+        ],
+        "target_left_xyz": [
+          -0.10386426001787186,
+          0.15705180168151855,
+          0.004999999888241291
+        ]
+      },
+      "tcp_after": [
+        -0.24838754534721375,
+        0.185847207903862,
+        0.09863051772117615,
+        -3.1459877490997314,
+        0.002332214266061783,
+        0.0030632615089416504
+      ]
+    },
+    {
+      "status": "fail",
+      "failure_reason": "Pressed the button before completing the required actions.",
+      "execution_control_steps": 654,
+      "remaining_steps": 509,
+      "turn": 18,
+      "action": [
+        -0.24,
+        0.19,
+        0.012,
+        -3.1416,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "terminated": true,
+      "truncated": false,
+      "evaluator_only_hidden_state": {
+        "swing_count": 1,
+        "swing_over_limit": false,
+        "target_cube_xyz": [
+          -0.11288440972566605,
+          0.15732575953006744,
+          0.019999945536255836
+        ],
+        "target_right_xyz": [
+          -0.10951298475265503,
+          -0.21231338381767273,
+          0.004999999888241291
+        ],
+        "target_left_xyz": [
+          -0.10386426001787186,
+          0.15705180168151855,
+          0.004999999888241291
+        ]
+      },
+      "tcp_after": [
+        -0.24433808028697968,
+        0.18841412663459778,
+        0.03225874900817871,
+        -3.1419625282287598,
+        0.002122882753610611,
+        0.0022893548011779785
+      ]
+    }
+  ],
+  "swing_lowered": [
+    {
+      "turn": 0,
+      "action": [
+        0.025,
+        0.085,
+        0.09,
+        -3.1416,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "status": "ongoing",
+      "execution_control_steps": 50,
+      "evaluator_only_swing_count": 0,
+      "evaluator_only_cube_xyz": [
+        0.022361429408192635,
+        0.08313572406768799,
+        0.019999921321868896
+      ],
+      "failure_reason": null
+    },
+    {
+      "turn": 1,
+      "action": [
+        0.02,
+        0.082,
+        0.02,
+        -3.1416,
+        0.0,
+        0.0,
+        -1.0
+      ],
+      "status": "ongoing",
+      "execution_control_steps": 78,
+      "evaluator_only_swing_count": 0,
+      "evaluator_only_cube_xyz": [
+        0.02250571735203266,
+        0.08114542067050934,
+        0.02016521617770195
+      ],
+      "failure_reason": null
+    },
+    {
+      "turn": 2,
+      "action": [
+        0.018,
+        0.082,
+        0.12,
+        -3.1416,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "status": "ongoing",
+      "execution_control_steps": 97,
+      "evaluator_only_swing_count": 0,
+      "evaluator_only_cube_xyz": [
+        0.02035936526954174,
+        0.08152904361486435,
+        0.11852536350488663
+      ],
+      "failure_reason": null
+    },
+    {
+      "turn": 3,
+      "action": [
+        -0.113,
+        -0.216,
+        0.09999999999999999,
+        -3.1416,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "status": "ongoing",
+      "execution_control_steps": 136,
+      "evaluator_only_swing_count": 1,
+      "evaluator_only_cube_xyz": [
+        -0.11908047646284103,
+        -0.2121128886938095,
+        0.10314462333917618
+      ],
+      "failure_reason": null
+    },
+    {
+      "turn": 4,
+      "action": [
+        -0.113,
+        0.16,
+        0.09999999999999999,
+        -3.1416,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "status": "ongoing",
+      "execution_control_steps": 174,
+      "evaluator_only_swing_count": 2,
+      "evaluator_only_cube_xyz": [
+        -0.12258028239011765,
+        0.15651491284370422,
+        0.10238739848136902
+      ],
+      "failure_reason": null
+    },
+    {
+      "turn": 5,
+      "action": [
+        -0.113,
+        -0.216,
+        0.09999999999999999,
+        -3.1416,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "status": "ongoing",
+      "execution_control_steps": 212,
+      "evaluator_only_swing_count": 3,
+      "evaluator_only_cube_xyz": [
+        -0.12263274192810059,
+        -0.2157755047082901,
+        0.10342571139335632
+      ],
+      "failure_reason": null
+    },
+    {
+      "turn": 6,
+      "action": [
+        -0.113,
+        0.16,
+        0.09999999999999999,
+        -3.1416,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "status": "ongoing",
+      "execution_control_steps": 250,
+      "evaluator_only_swing_count": 4,
+      "evaluator_only_cube_xyz": [
+        -0.12275553494691849,
+        0.15533500909805298,
+        0.1023675799369812
+      ],
+      "failure_reason": null
+    },
+    {
+      "turn": 7,
+      "action": [
+        -0.113,
+        -0.216,
+        0.09999999999999999,
+        -3.1416,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "status": "ongoing",
+      "execution_control_steps": 288,
+      "evaluator_only_swing_count": 5,
+      "evaluator_only_cube_xyz": [
+        -0.12253669649362564,
+        -0.21602441370487213,
+        0.10329145938158035
+      ],
+      "failure_reason": null
+    },
+    {
+      "turn": 8,
+      "action": [
+        -0.113,
+        0.16,
+        0.09999999999999999,
+        -3.1416,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "status": "ongoing",
+      "execution_control_steps": 326,
+      "evaluator_only_swing_count": 6,
+      "evaluator_only_cube_xyz": [
+        -0.12280991673469543,
+        0.1551920473575592,
+        0.10234522074460983
+      ],
+      "failure_reason": null
+    },
+    {
+      "turn": 9,
+      "action": [
+        -0.113,
+        -0.216,
+        0.09999999999999999,
+        -3.1416,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "status": "ongoing",
+      "execution_control_steps": 364,
+      "evaluator_only_swing_count": 7,
+      "evaluator_only_cube_xyz": [
+        -0.12247159332036972,
+        -0.21616515517234802,
+        0.10315018147230148
+      ],
+      "failure_reason": null
+    },
+    {
+      "turn": 10,
+      "action": [
+        -0.113,
+        0.16,
+        0.09999999999999999,
+        -3.1416,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "status": "ongoing",
+      "execution_control_steps": 402,
+      "evaluator_only_swing_count": 8,
+      "evaluator_only_cube_xyz": [
+        -0.1228596568107605,
+        0.15506517887115479,
+        0.10232331603765488
+      ],
+      "failure_reason": null
+    },
+    {
+      "turn": 11,
+      "action": [
+        -0.113,
+        -0.216,
+        0.09999999999999999,
+        -3.1416,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "status": "ongoing",
+      "execution_control_steps": 440,
+      "evaluator_only_swing_count": 9,
+      "evaluator_only_cube_xyz": [
+        -0.12240976840257645,
+        -0.216128408908844,
+        0.10300128906965256
+      ],
+      "failure_reason": null
+    },
+    {
+      "turn": 12,
+      "action": [
+        -0.113,
+        0.16,
+        0.09999999999999999,
+        -3.1416,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "status": "ongoing",
+      "execution_control_steps": 478,
+      "evaluator_only_swing_count": 10,
+      "evaluator_only_cube_xyz": [
+        -0.12290394306182861,
+        0.15494859218597412,
+        0.10230383276939392
+      ],
+      "failure_reason": null
+    },
+    {
+      "turn": 13,
+      "action": [
+        -0.113,
+        -0.216,
+        0.09999999999999999,
+        -3.1416,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "status": "ongoing",
+      "execution_control_steps": 516,
+      "evaluator_only_swing_count": 11,
+      "evaluator_only_cube_xyz": [
+        -0.12234503030776978,
+        -0.21625299751758575,
+        0.1028449535369873
+      ],
+      "failure_reason": null
+    },
+    {
+      "turn": 14,
+      "action": [
+        -0.113,
+        0.16,
+        0.09999999999999999,
+        -3.1416,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "status": "ongoing",
+      "execution_control_steps": 554,
+      "evaluator_only_swing_count": 12,
+      "evaluator_only_cube_xyz": [
+        -0.12294784188270569,
+        0.1548364907503128,
+        0.1022847518324852
+      ],
+      "failure_reason": null
+    },
+    {
+      "turn": 15,
+      "action": [
+        -0.113,
+        0.16,
+        0.02,
+        -3.1416,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "status": "ongoing",
+      "execution_control_steps": 580,
+      "evaluator_only_swing_count": 12,
+      "evaluator_only_cube_xyz": [
+        -0.11242762953042984,
+        0.15734942257404327,
+        0.01999993436038494
+      ],
+      "failure_reason": null
+    },
+    {
+      "turn": 16,
+      "action": [
+        -0.117,
+        0.158,
+        0.12,
+        -3.1416,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "status": "ongoing",
+      "execution_control_steps": 602,
+      "evaluator_only_swing_count": 12,
+      "evaluator_only_cube_xyz": [
+        -0.11242711544036865,
+        0.15734931826591492,
+        0.01999993436038494
+      ],
+      "failure_reason": null
+    },
+    {
+      "turn": 17,
+      "action": [
+        -0.25,
+        0.19,
+        0.1,
+        -3.1416,
+        0.0,
+        0.0,
+        -1.0
+      ],
+      "status": "ongoing",
+      "execution_control_steps": 633,
+      "evaluator_only_swing_count": 12,
+      "evaluator_only_cube_xyz": [
+        -0.11242712289094925,
+        0.15734931826591492,
+        0.019999884068965912
+      ],
+      "failure_reason": null
+    },
+    {
+      "turn": 18,
+      "action": [
+        -0.24,
+        0.19,
+        0.012,
+        -3.1416,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "status": "success",
+      "execution_control_steps": 649,
+      "evaluator_only_swing_count": 12,
+      "evaluator_only_cube_xyz": [
+        -0.11242712289094925,
+        0.15734931826591492,
+        0.019999884068965912
+      ],
+      "failure_reason": null
+    }
+  ],
+  "placement_original": [
+    {
+      "turn": 0,
+      "action": [
+        -0.28,
+        0.14,
+        0.12,
+        -3.1416,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "status": "ongoing",
+      "terminated": false,
+      "truncated": false,
+      "execution_control_steps": 61,
+      "remaining_steps": 477,
+      "feedback": {}
+    },
+    {
+      "turn": 1,
+      "action": [
+        -0.281,
+        0.137,
+        0.022,
+        -3.1416,
+        0.0,
+        0.0,
+        -1.0
+      ],
+      "status": "ongoing",
+      "terminated": false,
+      "truncated": false,
+      "execution_control_steps": 102,
+      "remaining_steps": 436,
+      "feedback": {}
+    },
+    {
+      "turn": 2,
+      "action": [
+        -0.284,
+        0.1364,
+        0.14,
+        -3.1416,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "status": "ongoing",
+      "terminated": false,
+      "truncated": false,
+      "execution_control_steps": 138,
+      "remaining_steps": 400,
+      "feedback": {}
+    },
+    {
+      "turn": 3,
+      "action": [
+        -0.155,
+        0.013,
+        0.14,
+        -3.1416,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "status": "ongoing",
+      "terminated": false,
+      "truncated": false,
+      "execution_control_steps": 167,
+      "remaining_steps": 371,
+      "feedback": {}
+    },
+    {
+      "turn": 4,
+      "action": [
+        -0.15,
+        0.014,
+        0.024,
+        -3.1416,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "status": "ongoing",
+      "terminated": false,
+      "truncated": false,
+      "execution_control_steps": 191,
+      "remaining_steps": 347,
+      "feedback": {}
+    },
+    {
+      "turn": 5,
+      "action": [
+        -0.1548,
+        0.0143,
+        0.021,
+        -3.1416,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "status": "ongoing",
+      "terminated": false,
+      "truncated": false,
+      "execution_control_steps": 202,
+      "remaining_steps": 336,
+      "feedback": {}
+    },
+    {
+      "turn": 6,
+      "action": [
+        -0.1549,
+        0.0144,
+        0.14,
+        -3.1416,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "status": "success",
+      "terminated": true,
+      "truncated": false,
+      "execution_control_steps": 216,
+      "remaining_steps": 322,
+      "feedback": {}
+    }
+  ],
+  "placement_hold_then_retreat": [
+    {
+      "phase": "saved_prefix",
+      "status": "ongoing",
+      "execution_control_steps": 61,
+      "remaining_steps": 477,
+      "terminated": false,
+      "truncated": false
+    },
+    {
+      "phase": "saved_prefix",
+      "status": "ongoing",
+      "execution_control_steps": 102,
+      "remaining_steps": 436,
+      "terminated": false,
+      "truncated": false
+    },
+    {
+      "phase": "saved_prefix",
+      "status": "ongoing",
+      "execution_control_steps": 138,
+      "remaining_steps": 400,
+      "terminated": false,
+      "truncated": false
+    },
+    {
+      "phase": "saved_prefix",
+      "status": "ongoing",
+      "execution_control_steps": 167,
+      "remaining_steps": 371,
+      "terminated": false,
+      "truncated": false
+    },
+    {
+      "phase": "saved_prefix",
+      "status": "ongoing",
+      "execution_control_steps": 191,
+      "remaining_steps": 347,
+      "terminated": false,
+      "truncated": false
+    },
+    {
+      "phase": "saved_prefix",
+      "status": "ongoing",
+      "execution_control_steps": 202,
+      "remaining_steps": 336,
+      "terminated": false,
+      "truncated": false
+    },
+    {
+      "phase": "hold_after_release",
+      "status": "ongoing",
+      "execution_control_steps": 203,
+      "remaining_steps": 335,
+      "terminated": false,
+      "truncated": false
+    },
+    {
+      "phase": "hold_after_release",
+      "status": "ongoing",
+      "execution_control_steps": 204,
+      "remaining_steps": 334,
+      "terminated": false,
+      "truncated": false
+    },
+    {
+      "phase": "hold_after_release",
+      "status": "ongoing",
+      "execution_control_steps": 205,
+      "remaining_steps": 333,
+      "terminated": false,
+      "truncated": false
+    },
+    {
+      "phase": "hold_after_release",
+      "status": "ongoing",
+      "execution_control_steps": 206,
+      "remaining_steps": 332,
+      "terminated": false,
+      "truncated": false
+    },
+    {
+      "phase": "hold_after_release",
+      "status": "ongoing",
+      "execution_control_steps": 207,
+      "remaining_steps": 331,
+      "terminated": false,
+      "truncated": false
+    },
+    {
+      "phase": "hold_after_release",
+      "status": "ongoing",
+      "execution_control_steps": 208,
+      "remaining_steps": 330,
+      "terminated": false,
+      "truncated": false
+    },
+    {
+      "phase": "hold_after_release",
+      "status": "ongoing",
+      "execution_control_steps": 209,
+      "remaining_steps": 329,
+      "terminated": false,
+      "truncated": false
+    },
+    {
+      "phase": "hold_after_release",
+      "status": "ongoing",
+      "execution_control_steps": 210,
+      "remaining_steps": 328,
+      "terminated": false,
+      "truncated": false
+    },
+    {
+      "phase": "hold_after_release",
+      "status": "ongoing",
+      "execution_control_steps": 211,
+      "remaining_steps": 327,
+      "terminated": false,
+      "truncated": false
+    },
+    {
+      "phase": "hold_after_release",
+      "status": "ongoing",
+      "execution_control_steps": 212,
+      "remaining_steps": 326,
+      "terminated": false,
+      "truncated": false
+    },
+    {
+      "phase": "hold_after_release",
+      "status": "ongoing",
+      "execution_control_steps": 213,
+      "remaining_steps": 325,
+      "terminated": false,
+      "truncated": false
+    },
+    {
+      "phase": "hold_after_release",
+      "status": "ongoing",
+      "execution_control_steps": 214,
+      "remaining_steps": 324,
+      "terminated": false,
+      "truncated": false
+    },
+    {
+      "phase": "hold_after_release",
+      "status": "ongoing",
+      "execution_control_steps": 215,
+      "remaining_steps": 323,
+      "terminated": false,
+      "truncated": false
+    },
+    {
+      "phase": "hold_after_release",
+      "status": "ongoing",
+      "execution_control_steps": 216,
+      "remaining_steps": 322,
+      "terminated": false,
+      "truncated": false
+    },
+    {
+      "phase": "hold_after_release",
+      "status": "ongoing",
+      "execution_control_steps": 217,
+      "remaining_steps": 321,
+      "terminated": false,
+      "truncated": false
+    },
+    {
+      "phase": "hold_after_release",
+      "status": "ongoing",
+      "execution_control_steps": 218,
+      "remaining_steps": 320,
+      "terminated": false,
+      "truncated": false
+    },
+    {
+      "phase": "hold_after_release",
+      "status": "ongoing",
+      "execution_control_steps": 219,
+      "remaining_steps": 319,
+      "terminated": false,
+      "truncated": false
+    },
+    {
+      "phase": "hold_after_release",
+      "status": "ongoing",
+      "execution_control_steps": 220,
+      "remaining_steps": 318,
+      "terminated": false,
+      "truncated": false
+    },
+    {
+      "phase": "hold_after_release",
+      "status": "ongoing",
+      "execution_control_steps": 221,
+      "remaining_steps": 317,
+      "terminated": false,
+      "truncated": false
+    },
+    {
+      "phase": "hold_after_release",
+      "status": "ongoing",
+      "execution_control_steps": 222,
+      "remaining_steps": 316,
+      "terminated": false,
+      "truncated": false
+    },
+    {
+      "phase": "hold_after_release",
+      "status": "ongoing",
+      "execution_control_steps": 223,
+      "remaining_steps": 315,
+      "terminated": false,
+      "truncated": false
+    },
+    {
+      "phase": "hold_after_release",
+      "status": "ongoing",
+      "execution_control_steps": 224,
+      "remaining_steps": 314,
+      "terminated": false,
+      "truncated": false
+    },
+    {
+      "phase": "hold_after_release",
+      "status": "ongoing",
+      "execution_control_steps": 225,
+      "remaining_steps": 313,
+      "terminated": false,
+      "truncated": false
+    },
+    {
+      "phase": "hold_after_release",
+      "status": "ongoing",
+      "execution_control_steps": 226,
+      "remaining_steps": 312,
+      "terminated": false,
+      "truncated": false
+    },
+    {
+      "phase": "hold_after_release",
+      "status": "ongoing",
+      "execution_control_steps": 227,
+      "remaining_steps": 311,
+      "terminated": false,
+      "truncated": false
+    },
+    {
+      "phase": "hold_after_release",
+      "status": "ongoing",
+      "execution_control_steps": 228,
+      "remaining_steps": 310,
+      "terminated": false,
+      "truncated": false
+    },
+    {
+      "phase": "hold_after_release",
+      "status": "ongoing",
+      "execution_control_steps": 229,
+      "remaining_steps": 309,
+      "terminated": false,
+      "truncated": false
+    },
+    {
+      "phase": "hold_after_release",
+      "status": "ongoing",
+      "execution_control_steps": 230,
+      "remaining_steps": 308,
+      "terminated": false,
+      "truncated": false
+    },
+    {
+      "phase": "hold_after_release",
+      "status": "ongoing",
+      "execution_control_steps": 231,
+      "remaining_steps": 307,
+      "terminated": false,
+      "truncated": false
+    },
+    {
+      "phase": "hold_after_release",
+      "status": "ongoing",
+      "execution_control_steps": 232,
+      "remaining_steps": 306,
+      "terminated": false,
+      "truncated": false
+    },
+    {
+      "phase": "hold_after_release",
+      "status": "ongoing",
+      "execution_control_steps": 233,
+      "remaining_steps": 305,
+      "terminated": false,
+      "truncated": false
+    },
+    {
+      "phase": "hold_after_release",
+      "status": "ongoing",
+      "execution_control_steps": 234,
+      "remaining_steps": 304,
+      "terminated": false,
+      "truncated": false
+    },
+    {
+      "phase": "hold_after_release",
+      "status": "ongoing",
+      "execution_control_steps": 235,
+      "remaining_steps": 303,
+      "terminated": false,
+      "truncated": false
+    },
+    {
+      "phase": "hold_after_release",
+      "status": "ongoing",
+      "execution_control_steps": 236,
+      "remaining_steps": 302,
+      "terminated": false,
+      "truncated": false
+    },
+    {
+      "phase": "hold_after_release",
+      "status": "ongoing",
+      "execution_control_steps": 237,
+      "remaining_steps": 301,
+      "terminated": false,
+      "truncated": false
+    },
+    {
+      "phase": "hold_after_release",
+      "status": "ongoing",
+      "execution_control_steps": 238,
+      "remaining_steps": 300,
+      "terminated": false,
+      "truncated": false
+    },
+    {
+      "phase": "hold_after_release",
+      "status": "ongoing",
+      "execution_control_steps": 239,
+      "remaining_steps": 299,
+      "terminated": false,
+      "truncated": false
+    },
+    {
+      "phase": "hold_after_release",
+      "status": "ongoing",
+      "execution_control_steps": 240,
+      "remaining_steps": 298,
+      "terminated": false,
+      "truncated": false
+    },
+    {
+      "phase": "hold_after_release",
+      "status": "ongoing",
+      "execution_control_steps": 241,
+      "remaining_steps": 297,
+      "terminated": false,
+      "truncated": false
+    },
+    {
+      "phase": "hold_after_release",
+      "status": "ongoing",
+      "execution_control_steps": 242,
+      "remaining_steps": 296,
+      "terminated": false,
+      "truncated": false
+    },
+    {
+      "phase": "saved_retreat",
+      "status": "success",
+      "execution_control_steps": 256,
+      "remaining_steps": 282,
+      "terminated": true,
+      "truncated": false
+    }
+  ],
+  "note": "Post-hoc diagnostics; evaluator state never supplied to policy. Height intervention selected after inspecting evaluator.",
+  "swing_with_generic_verification_prompt": [
+    {
+      "status": "ongoing",
+      "execution_control_steps": 47,
+      "remaining_steps": 1116,
+      "turn": 0,
+      "action": [
+        0.025,
+        0.083,
+        0.13,
+        -3.1416,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "terminated": false,
+      "truncated": false,
+      "evaluator_only_hidden_state": {
+        "swing_count": 0,
+        "swing_over_limit": false,
+        "target_cube_xyz": [
+          0.022361429408192635,
+          0.08313572406768799,
+          0.019999921321868896
+        ],
+        "target_right_xyz": [
+          -0.10951298475265503,
+          -0.21231338381767273,
+          0.004999999888241291
+        ],
+        "target_left_xyz": [
+          -0.10386426001787186,
+          0.15705180168151855,
+          0.004999999888241291
+        ]
+      },
+      "tcp_after": [
+        0.00920878630131483,
+        0.083297498524189,
+        0.12949678301811218,
+        -3.13905930519104,
+        0.0031764544546604156,
+        0.0012655854225158691
+      ]
+    },
+    {
+      "status": "ongoing",
+      "execution_control_steps": 79,
+      "remaining_steps": 1084,
+      "turn": 1,
+      "action": [
+        0.021,
+        0.083,
+        0.022,
+        -3.1416,
+        0.0,
+        0.0,
+        -1.0
+      ],
+      "terminated": false,
+      "truncated": false,
+      "evaluator_only_hidden_state": {
+        "swing_count": 0,
+        "swing_over_limit": false,
+        "target_cube_xyz": [
+          0.022607913240790367,
+          0.08212121576070786,
+          0.020161638036370277
+        ],
+        "target_right_xyz": [
+          -0.10951298475265503,
+          -0.21231338381767273,
+          0.004999999888241291
+        ],
+        "target_left_xyz": [
+          -0.10386426001787186,
+          0.15705180168151855,
+          0.004999999888241291
+        ]
+      },
+      "tcp_after": [
+        0.017802700400352478,
+        0.08313802629709244,
+        0.01825806498527527,
+        -3.1392176151275635,
+        0.0028696097433567047,
+        0.0015454888343811035
+      ]
+    },
+    {
+      "status": "ongoing",
+      "execution_control_steps": 98,
+      "remaining_steps": 1065,
+      "turn": 2,
+      "action": [
+        0.018,
+        0.083,
+        0.12,
+        -3.1416,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "terminated": false,
+      "truncated": false,
+      "evaluator_only_hidden_state": {
+        "swing_count": 0,
+        "swing_over_limit": false,
+        "target_cube_xyz": [
+          0.020463861525058746,
+          0.08266431838274002,
+          0.1172533929347992
+        ],
+        "target_right_xyz": [
+          -0.10951298475265503,
+          -0.21231338381767273,
+          0.004999999888241291
+        ],
+        "target_left_xyz": [
+          -0.10386426001787186,
+          0.15705180168151855,
+          0.004999999888241291
+        ]
+      },
+      "tcp_after": [
+        0.015664201229810715,
+        0.08368459343910217,
+        0.11534854024648666,
+        -3.139028310775757,
+        0.0001282729208469391,
+        0.001648247241973877
+      ]
+    },
+    {
+      "status": "ongoing",
+      "execution_control_steps": 137,
+      "remaining_steps": 1026,
+      "turn": 3,
+      "action": [
+        -0.113,
+        -0.216,
+        0.12,
+        -3.1416,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "terminated": false,
+      "truncated": false,
+      "evaluator_only_hidden_state": {
+        "swing_count": 0,
+        "swing_over_limit": false,
+        "target_cube_xyz": [
+          -0.11898725479841232,
+          -0.21188510954380035,
+          0.12142127007246017
+        ],
+        "target_right_xyz": [
+          -0.10951298475265503,
+          -0.21231338381767273,
+          0.004999999888241291
+        ],
+        "target_left_xyz": [
+          -0.10386426001787186,
+          0.15705180168151855,
+          0.004999999888241291
+        ]
+      },
+      "tcp_after": [
+        -0.1237834095954895,
+        -0.2108439803123474,
+        0.11951784789562225,
+        -3.1374967098236084,
+        9.346380829811096e-05,
+        -0.0024687647819519043
+      ]
+    },
+    {
+      "status": "ongoing",
+      "execution_control_steps": 177,
+      "remaining_steps": 986,
+      "turn": 4,
+      "action": [
+        -0.113,
+        0.16,
+        0.12,
+        -3.1416,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "terminated": false,
+      "truncated": false,
+      "evaluator_only_hidden_state": {
+        "swing_count": 0,
+        "swing_over_limit": false,
+        "target_cube_xyz": [
+          -0.12270224839448929,
+          0.1576436161994934,
+          0.12084565311670303
+        ],
+        "target_right_xyz": [
+          -0.10951298475265503,
+          -0.21231338381767273,
+          0.004999999888241291
+        ],
+        "target_left_xyz": [
+          -0.10386426001787186,
+          0.15705180168151855,
+          0.004999999888241291
+        ]
+      },
+      "tcp_after": [
+        -0.12750059366226196,
+        0.15867090225219727,
+        0.11894320696592331,
+        -3.1377105712890625,
+        0.0002388991415500641,
+        0.00019317865371704102
+      ]
+    },
+    {
+      "status": "ongoing",
+      "execution_control_steps": 215,
+      "remaining_steps": 948,
+      "turn": 5,
+      "action": [
+        -0.113,
+        -0.216,
+        0.12,
+        -3.1416,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "terminated": false,
+      "truncated": false,
+      "evaluator_only_hidden_state": {
+        "swing_count": 0,
+        "swing_over_limit": false,
+        "target_cube_xyz": [
+          -0.1227455735206604,
+          -0.2165827453136444,
+          0.12225968390703201
+        ],
+        "target_right_xyz": [
+          -0.10951298475265503,
+          -0.21231338381767273,
+          0.004999999888241291
+        ],
+        "target_left_xyz": [
+          -0.10386426001787186,
+          0.15705180168151855,
+          0.004999999888241291
+        ]
+      },
+      "tcp_after": [
+        -0.1275404840707779,
+        -0.21553513407707214,
+        0.12035635113716125,
+        -3.1381795406341553,
+        0.0002648867666721344,
+        -0.003782927989959717
+      ]
+    },
+    {
+      "status": "ongoing",
+      "execution_control_steps": 253,
+      "remaining_steps": 910,
+      "turn": 6,
+      "action": [
+        -0.113,
+        0.16,
+        0.12,
+        -3.1416,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "terminated": false,
+      "truncated": false,
+      "evaluator_only_hidden_state": {
+        "swing_count": 0,
+        "swing_over_limit": false,
+        "target_cube_xyz": [
+          -0.12320183217525482,
+          0.1555473953485489,
+          0.12091332674026489
+        ],
+        "target_right_xyz": [
+          -0.10951298475265503,
+          -0.21231338381767273,
+          0.004999999888241291
+        ],
+        "target_left_xyz": [
+          -0.10386426001787186,
+          0.15705180168151855,
+          0.004999999888241291
+        ]
+      },
+      "tcp_after": [
+        -0.127999946475029,
+        0.15657514333724976,
+        0.1190108060836792,
+        -3.1383047103881836,
+        0.0003862418234348297,
+        -0.0003313422203063965
+      ]
+    },
+    {
+      "status": "ongoing",
+      "execution_control_steps": 291,
+      "remaining_steps": 872,
+      "turn": 7,
+      "action": [
+        -0.113,
+        -0.216,
+        0.12,
+        -3.1416,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "terminated": false,
+      "truncated": false,
+      "evaluator_only_hidden_state": {
+        "swing_count": 0,
+        "swing_over_limit": false,
+        "target_cube_xyz": [
+          -0.12261482328176498,
+          -0.21724234521389008,
+          0.12208732962608337
+        ],
+        "target_right_xyz": [
+          -0.10951298475265503,
+          -0.21231338381767273,
+          0.004999999888241291
+        ],
+        "target_left_xyz": [
+          -0.10386426001787186,
+          0.15705180168151855,
+          0.004999999888241291
+        ]
+      },
+      "tcp_after": [
+        -0.12740905582904816,
+        -0.21619351208209991,
+        0.12018456310033798,
+        -3.138831615447998,
+        0.0004284419119358063,
+        -0.004289805889129639
+      ]
+    },
+    {
+      "status": "ongoing",
+      "execution_control_steps": 329,
+      "remaining_steps": 834,
+      "turn": 8,
+      "action": [
+        -0.113,
+        0.16,
+        0.12,
+        -3.1416,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "terminated": false,
+      "truncated": false,
+      "evaluator_only_hidden_state": {
+        "swing_count": 0,
+        "swing_over_limit": false,
+        "target_cube_xyz": [
+          -0.12330556660890579,
+          0.15512795746326447,
+          0.12096905708312988
+        ],
+        "target_right_xyz": [
+          -0.10951298475265503,
+          -0.21231338381767273,
+          0.004999999888241291
+        ],
+        "target_left_xyz": [
+          -0.10386426001787186,
+          0.15705180168151855,
+          0.004999999888241291
+        ]
+      },
+      "tcp_after": [
+        -0.1281033605337143,
+        0.15615668892860413,
+        0.11906683444976807,
+        -3.1389899253845215,
+        0.0005497969686985016,
+        -0.0008096098899841309
+      ]
+    },
+    {
+      "status": "ongoing",
+      "execution_control_steps": 367,
+      "remaining_steps": 796,
+      "turn": 9,
+      "action": [
+        -0.113,
+        -0.216,
+        0.12,
+        -3.1416,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "terminated": false,
+      "truncated": false,
+      "evaluator_only_hidden_state": {
+        "swing_count": 0,
+        "swing_over_limit": false,
+        "target_cube_xyz": [
+          -0.12251687794923782,
+          -0.2175639122724533,
+          0.12190023809671402
+        ],
+        "target_right_xyz": [
+          -0.10951298475265503,
+          -0.21231338381767273,
+          0.004999999888241291
+        ],
+        "target_left_xyz": [
+          -0.10386426001787186,
+          0.15705180168151855,
+          0.004999999888241291
+        ]
+      },
+      "tcp_after": [
+        -0.12731127440929413,
+        -0.21651417016983032,
+        0.1199972927570343,
+        -3.139549493789673,
+        0.0005998648703098297,
+        -0.004751384258270264
+      ]
+    },
+    {
+      "status": "ongoing",
+      "execution_control_steps": 405,
+      "remaining_steps": 758,
+      "turn": 10,
+      "action": [
+        -0.113,
+        0.16,
+        0.12,
+        -3.1416,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "terminated": false,
+      "truncated": false,
+      "evaluator_only_hidden_state": {
+        "swing_count": 0,
+        "swing_over_limit": false,
+        "target_cube_xyz": [
+          -0.12338890880346298,
+          0.15489231050014496,
+          0.12103628367185593
+        ],
+        "target_right_xyz": [
+          -0.10951298475265503,
+          -0.21231338381767273,
+          0.004999999888241291
+        ],
+        "target_left_xyz": [
+          -0.10386426001787186,
+          0.15705180168151855,
+          0.004999999888241291
+        ]
+      },
+      "tcp_after": [
+        -0.12818673253059387,
+        0.15592151880264282,
+        0.11913394182920456,
+        -3.1397385597229004,
+        0.0007221736013889313,
+        -0.0012559294700622559
+      ]
+    },
+    {
+      "status": "ongoing",
+      "execution_control_steps": 443,
+      "remaining_steps": 720,
+      "turn": 11,
+      "action": [
+        -0.113,
+        -0.216,
+        0.12,
+        -3.1416,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "terminated": false,
+      "truncated": false,
+      "evaluator_only_hidden_state": {
+        "swing_count": 0,
+        "swing_over_limit": false,
+        "target_cube_xyz": [
+          -0.12242718786001205,
+          -0.21777214109897614,
+          0.12169981002807617
+        ],
+        "target_right_xyz": [
+          -0.10951298475265503,
+          -0.21231338381767273,
+          0.004999999888241291
+        ],
+        "target_left_xyz": [
+          -0.10386426001787186,
+          0.15705180168151855,
+          0.004999999888241291
+        ]
+      },
+      "tcp_after": [
+        -0.12722164392471313,
+        -0.21672190725803375,
+        0.11979684978723526,
+        -3.140329599380493,
+        0.0007789172232151031,
+        -0.005182206630706787
+      ]
+    },
+    {
+      "status": "ongoing",
+      "execution_control_steps": 481,
+      "remaining_steps": 682,
+      "turn": 12,
+      "action": [
+        -0.113,
+        0.16,
+        0.12,
+        -3.1416,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "terminated": false,
+      "truncated": false,
+      "evaluator_only_hidden_state": {
+        "swing_count": 0,
+        "swing_over_limit": false,
+        "target_cube_xyz": [
+          -0.12346167117357254,
+          0.15472938120365143,
+          0.1211131364107132
+        ],
+        "target_right_xyz": [
+          -0.10951298475265503,
+          -0.21231338381767273,
+          0.004999999888241291
+        ],
+        "target_left_xyz": [
+          -0.10386426001787186,
+          0.15705180168151855,
+          0.004999999888241291
+        ]
+      },
+      "tcp_after": [
+        -0.12825965881347656,
+        0.15575887262821198,
+        0.11921077221632004,
+        -3.140549898147583,
+        0.0009009875357151031,
+        -0.0016719698905944824
+      ]
+    },
+    {
+      "status": "ongoing",
+      "execution_control_steps": 519,
+      "remaining_steps": 644,
+      "turn": 13,
+      "action": [
+        -0.113,
+        -0.216,
+        0.12,
+        -3.1416,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "terminated": false,
+      "truncated": false,
+      "evaluator_only_hidden_state": {
+        "swing_count": 0,
+        "swing_over_limit": false,
+        "target_cube_xyz": [
+          -0.122342050075531,
+          -0.21793076395988464,
+          0.12148703634738922
+        ],
+        "target_right_xyz": [
+          -0.10951298475265503,
+          -0.21231338381767273,
+          0.004999999888241291
+        ],
+        "target_left_xyz": [
+          -0.10386426001787186,
+          0.15705180168151855,
+          0.004999999888241291
+        ]
+      },
+      "tcp_after": [
+        -0.12713611125946045,
+        -0.2168802171945572,
+        0.11958443373441696,
+        -3.1411731243133545,
+        0.0009639300405979156,
+        -0.005582988262176514
+      ]
+    },
+    {
+      "status": "ongoing",
+      "execution_control_steps": 557,
+      "remaining_steps": 606,
+      "turn": 14,
+      "action": [
+        -0.113,
+        0.16,
+        0.12,
+        -3.1416,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "terminated": false,
+      "truncated": false,
+      "evaluator_only_hidden_state": {
+        "swing_count": 0,
+        "swing_over_limit": false,
+        "target_cube_xyz": [
+          -0.12246627360582352,
+          0.15709204971790314,
+          0.12177038937807083
+        ],
+        "target_right_xyz": [
+          -0.10951298475265503,
+          -0.21231338381767273,
+          0.004999999888241291
+        ],
+        "target_left_xyz": [
+          -0.10386426001787186,
+          0.15705180168151855,
+          0.004999999888241291
+        ]
+      },
+      "tcp_after": [
+        -0.12726758420467377,
+        0.15809479355812073,
+        0.11986283957958221,
+        -3.1417768001556396,
+        6.771460175514221e-05,
+        0.0034604668617248535
+      ]
+    },
+    {
+      "status": "ongoing",
+      "execution_control_steps": 578,
+      "remaining_steps": 585,
+      "turn": 15,
+      "action": [
+        -0.127,
+        0.158,
+        0.022,
+        -3.1416,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "terminated": false,
+      "truncated": false,
+      "evaluator_only_hidden_state": {
+        "swing_count": 1,
+        "swing_over_limit": false,
+        "target_cube_xyz": [
+          -0.1268959939479828,
+          0.15783125162124634,
+          0.024783210828900337
+        ],
+        "target_right_xyz": [
+          -0.10951298475265503,
+          -0.21231338381767273,
+          0.004999999888241291
+        ],
+        "target_left_xyz": [
+          -0.10386426001787186,
+          0.15705180168151855,
+          0.004999999888241291
+        ]
+      },
+      "tcp_after": [
+        -0.1317041963338852,
+        0.1588311642408371,
+        0.02289242297410965,
+        -3.1418442726135254,
+        0.003416065126657486,
+        0.0042310357093811035
+      ]
+    },
+    {
+      "status": "ongoing",
+      "execution_control_steps": 586,
+      "remaining_steps": 577,
+      "turn": 16,
+      "action": [
+        -0.1317,
+        0.1588,
+        0.026,
+        -3.1416,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "terminated": false,
+      "truncated": false,
+      "evaluator_only_hidden_state": {
+        "swing_count": 1,
+        "swing_over_limit": false,
+        "target_cube_xyz": [
+          -0.12819181382656097,
+          0.1580289751291275,
+          0.019999876618385315
+        ],
+        "target_right_xyz": [
+          -0.10951298475265503,
+          -0.21231338381767273,
+          0.004999999888241291
+        ],
+        "target_left_xyz": [
+          -0.10386426001787186,
+          0.15705180168151855,
+          0.004999999888241291
+        ]
+      },
+      "tcp_after": [
+        -0.13238182663917542,
+        0.1590263843536377,
+        0.022759869694709778,
+        -3.14231538772583,
+        0.004981521517038345,
+        0.0031302571296691895
+      ]
+    },
+    {
+      "status": "ongoing",
+      "execution_control_steps": 613,
+      "remaining_steps": 550,
+      "turn": 17,
+      "action": [
+        -0.1324,
+        0.159,
+        0.14,
+        -3.1416,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "terminated": false,
+      "truncated": false,
+      "evaluator_only_hidden_state": {
+        "swing_count": 1,
+        "swing_over_limit": false,
+        "target_cube_xyz": [
+          -0.12819135189056396,
+          0.15802887082099915,
+          0.01999995857477188
+        ],
+        "target_right_xyz": [
+          -0.10951298475265503,
+          -0.21231338381767273,
+          0.004999999888241291
+        ],
+        "target_left_xyz": [
+          -0.10386426001787186,
+          0.15705180168151855,
+          0.004999999888241291
+        ]
+      },
+      "tcp_after": [
+        -0.13589076697826385,
+        0.15837903320789337,
+        0.14009714126586914,
+        -3.1416728496551514,
+        -0.0010373555123806,
+        0.0019298195838928223
+      ]
+    },
+    {
+      "status": "ongoing",
+      "execution_control_steps": 645,
+      "remaining_steps": 518,
+      "turn": 18,
+      "action": [
+        -0.25,
+        0.19,
+        0.12,
+        -3.1416,
+        0.0,
+        0.0,
+        -1.0
+      ],
+      "terminated": false,
+      "truncated": false,
+      "evaluator_only_hidden_state": {
+        "swing_count": 1,
+        "swing_over_limit": false,
+        "target_cube_xyz": [
+          -0.12819135189056396,
+          0.15802887082099915,
+          0.01999995857477188
+        ],
+        "target_right_xyz": [
+          -0.10951298475265503,
+          -0.21231338381767273,
+          0.004999999888241291
+        ],
+        "target_left_xyz": [
+          -0.10386426001787186,
+          0.15705180168151855,
+          0.004999999888241291
+        ]
+      },
+      "tcp_after": [
+        -0.2511737048625946,
+        0.18642452359199524,
+        0.12000665068626404,
+        -3.1453912258148193,
+        -0.0016469918191432953,
+        0.0027900338172912598
+      ]
+    },
+    {
+      "status": "fail",
+      "failure_reason": "Pressed the button before completing the required actions.",
+      "execution_control_steps": 664,
+      "remaining_steps": 499,
+      "turn": 19,
+      "action": [
+        -0.247,
+        0.19,
+        0.015,
+        -3.1416,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "terminated": true,
+      "truncated": false,
+      "evaluator_only_hidden_state": {
+        "swing_count": 1,
+        "swing_over_limit": false,
+        "target_cube_xyz": [
+          -0.12819135189056396,
+          0.15802887082099915,
+          0.01999995857477188
+        ],
+        "target_right_xyz": [
+          -0.10951298475265503,
+          -0.21231338381767273,
+          0.004999999888241291
+        ],
+        "target_left_xyz": [
+          -0.10386426001787186,
+          0.15705180168151855,
+          0.004999999888241291
+        ]
+      },
+      "tcp_after": [
+        -0.2512374818325043,
+        0.19014549255371094,
+        0.03598164767026901,
+        -3.142446994781494,
+        0.0008900202810764313,
+        0.004217922687530518
+      ]
+    }
+  ]
+}

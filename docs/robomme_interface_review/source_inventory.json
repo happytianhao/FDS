@@ -1,0 +1,115 @@
+{
+  "review_date": "2026-11-10",
+  "repositories": [
+    {
+      "repo": "jackbjed/embodied-astra-robomme",
+      "path": ".cache/robomme_repo_review_20261110/embodied-astra-robomme",
+      "commit": "79dcc7f73f536948cb039103d3fc5e722d689207"
+    },
+    {
+      "repo": "bingaochen/Astra-on-RoboMME",
+      "path": ".cache/robomme_repo_review_20261110/Astra-on-RoboMME",
+      "commit": "4c3fd6a8667e7a219e547fe1a533a4b9726fc6db"
+    },
+    {
+      "repo": "worv-ai/PonderPounce",
+      "path": ".cache/robomme_repo_review_20261110/PonderPounce",
+      "commit": "723df35762bb641e1d520e4fa9359b98644adc21"
+    },
+    {
+      "repo": "RoboMME/robomme_policy_learning",
+      "path": ".cache/robomme_repo_review_20261110/robomme_policy_learning",
+      "commit": "ac846a9a4aec841e483b1dc5d620dfe426bde853",
+      "method": "pinned source archive; code/config/docs only",
+      "files": 172
+    },
+    {
+      "repo": "memi-robot/memi",
+      "path": ".cache/robomme_repo_review_20261110/memi",
+      "commit": "bb6c37ce6c14bd1a204c86a91cc0cb36f565a1f0",
+      "method": "pinned source archive; code/config/docs only",
+      "files": 125
+    },
+    {
+      "repo": "OpenBMB/SimpleMemVLA",
+      "path": ".cache/robomme_repo_review_20261110/SimpleMemVLA",
+      "commit": "453d6ec293e63318bbc2bce545d0b9256ab1bc51",
+      "method": "pinned source archive; code/config/docs only",
+      "files": 717
+    }
+  ],
+  "memi_act_fields": {
+    "BinFill": [
+      "deposited_blue",
+      "deposited_green",
+      "deposited_red",
+      "held_color",
+      "bin_center"
+    ],
+    "ButtonUnmask": [
+      "uncovered_scene",
+      "button_pressed",
+      "completed_pickups"
+    ],
+    "ButtonUnmaskSwap": [
+      "target_locations",
+      "tracking_frame",
+      "interaction_state",
+      "pickups_completed"
+    ],
+    "InsertPeg": [
+      "demonstration"
+    ],
+    "MoveCube": [
+      "method",
+      "initial_scene"
+    ],
+    "PatternLock": [
+      "pattern",
+      "reached_index"
+    ],
+    "PickHighlight": [
+      "highlight_frame",
+      "button_pressed",
+      "completed_targets"
+    ],
+    "PickXtimes": [
+      "placements_completed",
+      "milestone",
+      "button_center_xy"
+    ],
+    "RouteStick": [
+      "demonstration",
+      "completed_legs"
+    ],
+    "StopCube": [
+      "motion_reference"
+    ],
+    "SwingXtimes": [
+      "target_visits",
+      "right_target_center",
+      "button_center"
+    ],
+    "VideoPlaceButton": [
+      "post_button_target"
+    ],
+    "VideoPlaceOrder": [
+      "selected_placement"
+    ],
+    "VideoRepick": [
+      "target_location",
+      "completed_repetitions",
+      "button_location"
+    ],
+    "VideoUnmask": [
+      "demonstration_reference",
+      "completed_lifts"
+    ],
+    "VideoUnmaskSwap": [
+      "target_locations",
+      "completed_lifts",
+      "final_layout_keyframe"
+    ]
+  },
+  "memi_act_field_source": "https://github.com/memi-robot/memi/tree/bb6c37ce6c14bd1a204c86a91cc0cb36f565a1f0/artifacts/act/runs/opt_astra_act"
+}

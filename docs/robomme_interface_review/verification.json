@@ -1,0 +1,130 @@
+{
+  "checked_runs": [
+    {
+      "run": "full_ButtonUnmask_ep0",
+      "responses": 11,
+      "actions": 11
+    },
+    {
+      "run": "full_ButtonUnmask_ep0_resume1",
+      "responses": 18,
+      "actions": 18
+    },
+    {
+      "run": "full_SwingXtimes_ep0",
+      "responses": 11,
+      "actions": 11
+    },
+    {
+      "run": "full_SwingXtimes_ep0_resume1",
+      "responses": 19,
+      "actions": 19
+    },
+    {
+      "run": "full_VideoPlaceOrder_ep0",
+      "responses": 4,
+      "actions": 4
+    },
+    {
+      "run": "full_VideoPlaceOrder_ep0_resume1",
+      "responses": 7,
+      "actions": 7
+    },
+    {
+      "run": "no_dynamics_ButtonUnmask_ep0",
+      "responses": 21,
+      "actions": 21
+    },
+    {
+      "run": "no_dynamics_PatternLock_ep0",
+      "responses": 14,
+      "actions": 14
+    },
+    {
+      "run": "no_dynamics_SwingXtimes_ep0",
+      "responses": 19,
+      "actions": 19
+    },
+    {
+      "run": "no_dynamics_VideoPlaceOrder_ep0",
+      "responses": 7,
+      "actions": 7
+    },
+    {
+      "run": "no_history_ButtonUnmask_ep0",
+      "responses": 10,
+      "actions": 10
+    },
+    {
+      "run": "no_history_PatternLock_ep0",
+      "responses": 14,
+      "actions": 13
+    },
+    {
+      "run": "no_history_SwingXtimes_ep0",
+      "responses": 20,
+      "actions": 20
+    },
+    {
+      "run": "no_history_VideoPlaceOrder_ep0",
+      "responses": 6,
+      "actions": 6
+    },
+    {
+      "run": "pilot_full_PatternLock_ep0",
+      "responses": 5,
+      "actions": 5
+    },
+    {
+      "run": "sparse16_ButtonUnmask_ep0",
+      "responses": 16,
+      "actions": 16
+    },
+    {
+      "run": "sparse16_PatternLock_ep0",
+      "responses": 11,
+      "actions": 11
+    },
+    {
+      "run": "sparse16_SwingXtimes_ep0",
+      "responses": 19,
+      "actions": 19
+    },
+    {
+      "run": "sparse16_VideoPlaceOrder_ep0",
+      "responses": 6,
+      "actions": 6
+    },
+    {
+      "run": "verified_progress_PatternLock_ep0",
+      "responses": 14,
+      "actions": 14
+    },
+    {
+      "run": "verified_progress_SwingXtimes_ep0",
+      "responses": 20,
+      "actions": 20
+    }
+  ],
+  "unique_image_files_verified": 4222,
+  "matched_initial_frames_across_conditions": 579,
+  "paired_task_seeds": {
+    "ButtonUnmask": [
+      1567058032,
+      "easy"
+    ],
+    "SwingXtimes": [
+      1133203492,
+      "easy"
+    ],
+    "VideoPlaceOrder": [
+      1834444142,
+      "easy"
+    ],
+    "PatternLock": [
+      1223285224,
+      "easy"
+    ]
+  },
+  "checks": "Image bytes match recorded hashes; action components equal model JSON; first-scene pixels, goals and budgets agree across conditions; response totals agree."
+}

@@ -1,0 +1,21 @@
+{
+  "python": "3.12.4",
+  "packages": {
+    "torch": "2.9.1",
+    "numpy": "1.26.4",
+    "sapien": "3.0.2",
+    "gymnasium": "0.29.1",
+    "Pillow": "12.3.0",
+    "jsonschema": "4.26.0",
+    "matplotlib": "3.10.8"
+  },
+  "codex_cli": "codex-cli 0.163.0",
+  "gpu": "NVIDIA A100-SXM4-80GB, 580.65.06, 81920 MiB",
+  "requested_model": "gpt-6-astra",
+  "requested_effort": "medium",
+  "max_calls": 40,
+  "inference_timeout_seconds": 180,
+  "model_sampling_seed": "not controlled",
+  "control_frequency_hz": 20,
+  "date": "2026-11-10"
+}

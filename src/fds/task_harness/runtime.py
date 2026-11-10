@@ -1,5 +1,6 @@
 """Sys2-owned decisions; host-owned bounded memory, observations and mechanical execution."""
 
+import json
 from copy import deepcopy
 from dataclasses import asdict
 from pathlib import Path
@@ -14,9 +15,11 @@ from fds.task_harness.fds import execution_verdict
 from fds.task_harness.memory import EpisodicMemory
 from fds.task_harness.observation import (
     ObservationWindow,
+    deduplicate_image_inputs,
     group_images_by_camera,
     image_inputs,
 )
+from fds.task_harness.postcheck import OutcomeTracker
 from fds.task_harness.protocol import DecisionValidationError, TaskDecision, schema_for
 from fds.task_harness.skills import validate_skills
 from fds.task_harness.tools import ToolSession
@@ -49,6 +52,10 @@ class TaskHarness(EpisodeIO):
             raise ValueError("fds.contract_mode must be 'off' or 'full'")
         if not enabled:
             self.contract_mode = "off"
+        self.postcheck_enabled = fds_options.pop("postcheck_enabled", True)
+        if type(self.postcheck_enabled) is not bool:
+            raise ValueError("fds.postcheck_enabled must be a boolean")
+        self.postcheck_enabled = self.postcheck_enabled and self.contract_mode == "full"
         if fds_options:
             raise ValueError(f"Unknown fds options: {sorted(fds_options)}")
         for name, value, low, high in (
@@ -73,12 +80,14 @@ class TaskHarness(EpisodeIO):
         audit = AuditJournal(output, {"enabled": True, "capture_all_frames": True})
         window = ObservationWindow(output)
         memory = EpisodicMemory(self.max_keyframes)
+        outcomes = OutcomeTracker() if self.postcheck_enabled else None
         skills = deepcopy(self.skills)
         AuditJournal.write(
             output / "skills.json", {"skills": skills, "mutable_during_episode": False}
         )
         calls, stop = 0, "budget_exhausted"
         last_fds_contract, last_fds_verdict = None, None
+        last_fds_call, last_environment_fds = None, None
         rejection = None
         consecutive_rejections = rejected_decisions = correction_calls = recovered_decisions = 0
         summary, session = None, None
@@ -96,6 +105,9 @@ class TaskHarness(EpisodeIO):
                 "skills": deepcopy(skills),
                 "observation_window": window.describe(),
                 **memory.state(),
+                **({"outcome_tracking": outcomes.summary(),
+                    "event_memory_versions": outcomes.context(memory)["event_memory_versions"]}
+                   if outcomes else {}),
             }
 
         try:
@@ -158,6 +170,7 @@ class TaskHarness(EpisodeIO):
                     label["source"] = "retained_memory"
                 paths.extend(saved_paths)
                 labels.extend(saved_labels)
+                paths, labels = deduplicate_image_inputs(paths, labels)
                 paths, labels = group_images_by_camera(paths, labels)
                 if saved_labels:
                     log({"event": "retained_read", "frame_ids": list(memory.frames)})
@@ -260,14 +273,29 @@ class TaskHarness(EpisodeIO):
                     },
                 }
                 if self.contract_mode == "full":
+                    context["available_evidence_frames"] = list(dict.fromkeys(
+                        [f.index for f in pending] + list(memory.frames)
+                    ))
                     context["fds_protocol"] = {
-                        "version": "fds_v1",
+                        "version": "fds_v2_postcheck" if outcomes is not None else "fds_v1",
                         "contract_required": True,
                         "semantic_success": "never inferred from command execution alone",
                         "statuses": ["supported", "contradicted", "uncertain"],
                     }
                     context["last_fds_contract"] = deepcopy(last_fds_contract)
                     context["last_fds_verdict"] = deepcopy(last_fds_verdict)
+                    if (last_environment_fds is not None
+                            and last_environment_fds["request_call"] != last_fds_call):
+                        context["last_environment_fds"] = deepcopy(last_environment_fds)
+                        context["fds_protocol"]["environment_prediction"] = (
+                            "last_environment_fds preserves the prediction made before the "
+                            "last physical action through intervening auxiliary decisions. "
+                            "Compare it with supplied observations and execution feedback; "
+                            "the contract itself is not outcome evidence. Its host verdict "
+                            "classifies mechanical execution only, not visual/semantic truth."
+                        )
+                    if outcomes is not None:
+                        context.update(outcomes.context(memory))
                 conventions = getattr(self.env, "task_language_conventions", None)
                 if conventions:
                     context["task_language_conventions"] = conventions()
@@ -308,6 +336,22 @@ class TaskHarness(EpisodeIO):
                         delivered_frames=[f.index for f in pending],
                         retained_frames=list(memory.frames),
                     )
+                    staged_memory, memory_logs = None, []
+                    if outcomes is not None:
+                        # Validate the complete review against a preview, so a rejected
+                        # reconciliation cannot mutate memory or execute any tool.
+                        staged_memory = deepcopy(memory)
+                        staged_memory.update(decision, pending, calls, memory_logs.append)
+                        try:
+                            outcomes.validate(
+                                decision, memory, staged_memory,
+                                [f.index for f in pending] + list(memory.frames),
+                            )
+                        except ValueError as exc:
+                            raise DecisionValidationError(
+                                str(exc), code="outcome_validation", path=["fds_contract"],
+                                response=json.dumps(value, ensure_ascii=False),
+                            ) from exc
                 except DecisionValidationError as exc:
                     consecutive_rejections += 1
                     rejected_decisions += 1
@@ -342,20 +386,47 @@ class TaskHarness(EpisodeIO):
                 rejection, consecutive_rejections = None, 0
                 if decision.fds_contract is not None:
                     last_fds_contract = deepcopy(decision.fds_contract)
+                    last_fds_call = calls
                     AuditJournal.write(
                         audit.root / f"call_{calls - 1:04d}" / "fds_contract.json",
                         decision.fds_contract,
                     )
-                memory.update(decision, pending, calls, log)
+                if outcomes is not None:
+                    review = outcomes.accept_review(decision, memory, staged_memory, calls)
+                    memory = staged_memory
+                    for event in memory_logs:
+                        log(event)
+                    AuditJournal.write(
+                        audit.root / f"call_{calls - 1:04d}" / "outcome_review.json", review
+                    )
+                    log({"event": "outcome_review", **review})
+                else:
+                    memory.update(decision, pending, calls, log)
                 AuditJournal.write(
                     output / "memory_versions" / f"call_{calls - 1:04d}.json", memory.state()
                 )
                 log({"event": "decision", "call": calls, "step": steps, **value})
                 batch = session.execute(decision, calls, memory.frames)
+                if outcomes is not None:
+                    binding = outcomes.register_action(decision, batch, session.observation.current.index)
+                    if binding is not None:
+                        AuditJournal.write(
+                            audit.root / f"call_{calls - 1:04d}" / "action_outcomes.json", binding
+                        )
                 if decision.fds_contract is not None:
                     last_fds_verdict = execution_verdict(
                         decision.fds_contract, batch.receipts
                     )
+                    if batch.kind == "environment" and session.steps > batch.start_step:
+                        last_environment_fds = {
+                            "request_call": calls,
+                            "environment_steps_before": batch.start_step,
+                            "environment_steps_after": session.steps,
+                            "start_frame": batch.start_frame,
+                            "end_frame": session.observation.current.index,
+                            "contract": deepcopy(decision.fds_contract),
+                            "mechanical_verdict": deepcopy(last_fds_verdict),
+                        }
                     AuditJournal.write(
                         audit.root / f"call_{calls - 1:04d}" / "fds_verdict.json",
                         last_fds_verdict,
@@ -429,6 +500,9 @@ class TaskHarness(EpisodeIO):
                     raise
             finally:
                 if summary is not None:
+                    summary["postcheck_enabled"] = self.postcheck_enabled
+                    if outcomes is not None:
+                        summary["outcome_tracking"] = outcomes.summary()
                     summary["decision_recovery"] = {
                         "max_corrections": self.max_decision_corrections,
                         "rejected_decisions": rejected_decisions,

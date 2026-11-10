@@ -14,12 +14,17 @@ dependencies = ["numpy>=1.26,<2", "pillow>=10", "jsonschema>=4.23", "websockets>
 [project.optional-dependencies]
 api = ["openai>=2"]
 weights = ["google-crc32c>=1.6,<2"]
-dev = ["pytest>=8", "ruff>=0.11"]
+dev = ["pytest>=8", "ruff>=0.11", "psutil>=5.9"]
 
 [project.scripts]
 fds = "fds.cli:main"
 fds-meta = "fds.meta_harness.cli:main"
 fds-visualize = "fds.visualize:main"
+
+[[tool.uv.index]]
+name = "tuna"
+url = "https://pypi.tuna.tsinghua.edu.cn/simple"
+default = true
 
 [tool.hatch.build.targets.sdist]
 include = ["/src", "/tests", "/scripts", "/configs", "/requirements",

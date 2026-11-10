@@ -1,0 +1,204 @@
+{
+  "source": "https://robomme.github.io/data/plus.json",
+  "retrieved": "2026-11-10",
+  "sha256": "c7b644c1cfe49b92a9a232367a1ac16eea3531383ef60e8326a0bb19ad4a3687",
+  "evaluation": {
+    "updated_utc": "2026-10-28T17:26:48.398896+00:00",
+    "episodes_per_task": 50,
+    "note": "Completed rollout snapshot after the October 28 refresh: all 4,800 episode outcomes and 96 per-task scores were checked against the six published method summaries. Includes the refreshed PickHighlight results and 3-tier Astra ButtonUnmaskSwap results; retains other saved evaluations. Maintainer-provided approximate API display totals are unchanged."
+  },
+  "methods": [
+    {
+      "id": "framesamp-modul",
+      "name": "FrameSamp+Modul",
+      "results": {
+        "BinFill": 0.0,
+        "PickXtimes": 0.0,
+        "SwingXtimes": 0.0,
+        "StopCube": 0.04,
+        "VideoUnmask": 0.0,
+        "ButtonUnmask": 0.0,
+        "VideoUnmaskSwap": 0.0,
+        "ButtonUnmaskSwap": 0.0,
+        "PickHighlight": 0.0,
+        "VideoRepick": 0.02,
+        "VideoPlaceButton": 0.2,
+        "VideoPlaceOrder": 0.18,
+        "MoveCube": 0.0,
+        "InsertPeg": 0.0,
+        "PatternLock": 0.0,
+        "RouteStick": 0.0
+      },
+      "evaluation": {
+        "completed": 800,
+        "counts": {
+          "fail": 640,
+          "timeout": 138,
+          "success": 22
+        },
+        "latest_episode_finished_utc": "2026-10-28T02:37:46.632766+00:00",
+        "summary_sha256": "e8724f664dcab52521b1c756d01d1c2b533d85665fed092abc1e123ce3b06281"
+      }
+    },
+    {
+      "id": "simplememvla",
+      "name": "SimpleMemVLA",
+      "results": {
+        "BinFill": 0.0,
+        "PickXtimes": 0.0,
+        "SwingXtimes": 0.08,
+        "StopCube": 0.0,
+        "VideoUnmask": 0.0,
+        "ButtonUnmask": 0.0,
+        "VideoUnmaskSwap": 0.0,
+        "ButtonUnmaskSwap": 0.0,
+        "PickHighlight": 0.0,
+        "VideoRepick": 0.02,
+        "VideoPlaceButton": 0.16,
+        "VideoPlaceOrder": 0.06,
+        "MoveCube": 0.0,
+        "InsertPeg": 0.0,
+        "PatternLock": 0.0,
+        "RouteStick": 0.0
+      },
+      "evaluation": {
+        "completed": 800,
+        "counts": {
+          "timeout": 104,
+          "fail": 680,
+          "success": 16
+        },
+        "latest_episode_finished_utc": "2026-10-28T03:19:43.790989+00:00",
+        "summary_sha256": "a25b5e95552229a0163380f6d5d0b031ec636a16561e34189331496340665928"
+      }
+    },
+    {
+      "id": "ponderpounce",
+      "name": "PonderPounce",
+      "results": {
+        "BinFill": 0.02,
+        "PickXtimes": 0.0,
+        "SwingXtimes": 0.08,
+        "StopCube": 0.02,
+        "VideoUnmask": 0.0,
+        "ButtonUnmask": 0.0,
+        "VideoUnmaskSwap": 0.0,
+        "ButtonUnmaskSwap": 0.0,
+        "PickHighlight": 0.0,
+        "VideoRepick": 0.08,
+        "VideoPlaceButton": 0.22,
+        "VideoPlaceOrder": 0.04,
+        "MoveCube": 0.0,
+        "InsertPeg": 0.0,
+        "PatternLock": 0.0,
+        "RouteStick": 0.0
+      },
+      "evaluation": {
+        "completed": 800,
+        "counts": {
+          "fail": 611,
+          "success": 23,
+          "timeout": 166
+        },
+        "latest_episode_finished_utc": "2026-10-26T20:30:48.504191+00:00",
+        "summary_sha256": "f32d8e7f24445e16f488330b8372206f1d3a25c8670fbd7fffb122f6a4428518"
+      }
+    },
+    {
+      "id": "embodied-astra",
+      "name": "Embodied-Astra",
+      "results": {
+        "BinFill": 0.3,
+        "PickXtimes": 0.56,
+        "SwingXtimes": 0.28,
+        "StopCube": 0.3,
+        "VideoUnmask": 0.12,
+        "ButtonUnmask": 0.34,
+        "VideoUnmaskSwap": 0.02,
+        "ButtonUnmaskSwap": 0.12,
+        "PickHighlight": 0.32,
+        "VideoRepick": 0.18,
+        "VideoPlaceButton": 0.2,
+        "VideoPlaceOrder": 0.2,
+        "MoveCube": 0.22,
+        "InsertPeg": 0.2,
+        "PatternLock": 0.14,
+        "RouteStick": 0.12
+      },
+      "evaluation": {
+        "completed": 800,
+        "counts": {
+          "success": 181,
+          "fail": 542,
+          "timeout": 77
+        },
+        "latest_episode_finished_utc": "2026-10-28T03:34:17.556641+00:00",
+        "summary_sha256": "32cd3ea08d32b144031b2de35b8c6dbe2f76c89e2c1813e67455b5a125375ebf"
+      }
+    },
+    {
+      "id": "embodied-astra-fs",
+      "name": "One-shot Embodied-Astra",
+      "results": {
+        "BinFill": 0.28,
+        "PickXtimes": 0.84,
+        "SwingXtimes": 0.98,
+        "StopCube": 0.32,
+        "VideoUnmask": 0.24,
+        "ButtonUnmask": 0.94,
+        "VideoUnmaskSwap": 0.02,
+        "ButtonUnmaskSwap": 0.32,
+        "PickHighlight": 0.42,
+        "VideoRepick": 0.14,
+        "VideoPlaceButton": 0.24,
+        "VideoPlaceOrder": 0.18,
+        "MoveCube": 0.18,
+        "InsertPeg": 0.28,
+        "PatternLock": 0.18,
+        "RouteStick": 0.08
+      },
+      "evaluation": {
+        "completed": 800,
+        "counts": {
+          "success": 282,
+          "fail": 478,
+          "timeout": 40
+        },
+        "latest_episode_finished_utc": "2026-10-28T04:59:14.126076+00:00",
+        "summary_sha256": "63fbb9ce3a1ef8f8bc95cda7a84eb353cb2b1d06b647b3507add63689e8ab06d"
+      }
+    },
+    {
+      "id": "3-tier-astra",
+      "name": "3-tier Astra",
+      "results": {
+        "BinFill": 0.06,
+        "PickXtimes": 0.06,
+        "SwingXtimes": 0.1,
+        "StopCube": 0.0,
+        "VideoUnmask": 0.04,
+        "ButtonUnmask": 0.0,
+        "VideoUnmaskSwap": 0.0,
+        "ButtonUnmaskSwap": 0.0,
+        "PickHighlight": 0.0,
+        "VideoRepick": 0.02,
+        "VideoPlaceButton": 0.68,
+        "VideoPlaceOrder": 0.56,
+        "MoveCube": 0.0,
+        "InsertPeg": 0.0,
+        "PatternLock": 0.0,
+        "RouteStick": 0.0
+      },
+      "evaluation": {
+        "completed": 800,
+        "counts": {
+          "fail": 452,
+          "timeout": 272,
+          "success": 76
+        },
+        "latest_episode_finished_utc": "2026-10-28T05:49:51.795128+00:00",
+        "summary_sha256": "9347ae4ba70b31307aac92095ebb631748541411794d721500301f9938689c85"
+      }
+    }
+  ]
+}

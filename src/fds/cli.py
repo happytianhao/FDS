@@ -121,7 +121,7 @@ def resolve_executor_defaults(config):
         fds = config.setdefault("fds", {})
         if not isinstance(fds, dict):
             raise ValueError("fds must be a table")
-        unknown = set(fds) - {"enabled", "contract_mode"}
+        unknown = set(fds) - {"enabled", "contract_mode", "postcheck_enabled"}
         if unknown:
             raise ValueError(f"Unknown fds options: {sorted(unknown)}")
         enabled = fds.get("enabled", True)
@@ -134,6 +134,10 @@ def resolve_executor_defaults(config):
             mode = "off"
         fds["enabled"] = mode != "off"
         fds["contract_mode"] = mode
+        postcheck = fds.get("postcheck_enabled", True)
+        if type(postcheck) is not bool:
+            raise ValueError("fds.postcheck_enabled must be a boolean")
+        fds["postcheck_enabled"] = postcheck and mode == "full"
         from fds.task_harness.skills import validate_skills
 
         validate_skills(config["task_harness"].get("skills", []))

@@ -87,18 +87,27 @@ def validate_contract(contract: dict, *, delivered_frames=None, retained_frames=
             raise ValueError(f"Candidate {candidate['id']} has unknown assumptions: {missing}")
     if delivered_frames is not None or retained_frames is not None:
         available = set(delivered_frames or ()) | set(retained_frames or ())
-        for assumption in contract["assumptions"]:
-            unknown = [ref for ref in assumption["evidence_refs"] if ref not in available]
-            if unknown:
-                raise ValueError(
-                    f"Assumption {assumption['id']} cites unavailable evidence: {unknown}"
-                )
-        for requirement in contract["required_evidence"]:
-            unknown = [ref for ref in requirement["evidence_refs"] if ref not in available]
-            if unknown:
-                raise ValueError(
-                    f"Evidence requirement {requirement['id']} cites unavailable evidence: {unknown}"
-                )
+        invalid_refs = []
+        for group in ("assumptions", "required_evidence"):
+            for index, item in enumerate(contract[group]):
+                unknown = [ref for ref in item["evidence_refs"] if ref not in available]
+                if unknown:
+                    invalid_refs.append(
+                        f"fds_contract.{group}[{index}].evidence_refs "
+                        f"(id={item['id']}) cites unavailable evidence: {unknown}"
+                    )
+        if invalid_refs:
+            raise ValueError(
+                "; ".join(invalid_refs)
+                + f". Available citation IDs are {sorted(available, key=str)}. "
+                "Correct the reference arrays themselves; changing confidence, status "
+                "or commitment does not make an unavailable frame valid. Each evidence_refs "
+                f"array accepts at most {FDS_REFS['maxItems']} individual frame IDs. "
+                "Choose a relevant subset of already supplied evidence if necessary; "
+                "never concatenate IDs or encode ranges as one integer. Check evidence_frames "
+                "in proposed memory updates for the same issue. Do not invent replacement "
+                "evidence or automatically split an invalid ID."
+            )
     selected_candidate = candidates[selected]
     if contract["commitment"] == "committed":
         unresolved = [
@@ -123,6 +132,7 @@ def validate_contract(contract: dict, *, delivered_frames=None, retained_frames=
 
 def execution_verdict(contract: dict, receipts: list[dict]) -> dict:
     """Classify only public mechanical feedback; semantic success stays unknown."""
+    scope = {"scope": "mechanical_execution", "semantic_status": "unassessed"}
     rejected = [r for r in receipts if r.get("status") == "rejected"]
     public_errors = [
         r
@@ -132,14 +142,16 @@ def execution_verdict(contract: dict, receipts: list[dict]) -> dict:
     ]
     if rejected or public_errors:
         return {
+            **scope,
             "status": "contradicted",
             "reason": "public_execution_feedback",
             "rejected_receipts": rejected,
             "public_error_receipts": public_errors,
         }
     if not receipts:
-        return {"status": "uncertain", "reason": "no_execution_receipt"}
+        return {**scope, "status": "uncertain", "reason": "no_execution_receipt"}
     return {
+        **scope,
         "status": "uncertain",
         "reason": "command_execution_does_not_certify_semantic_outcome",
     }

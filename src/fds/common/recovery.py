@@ -24,15 +24,17 @@ class RecoveryConfig:
     retry_delay_seconds: float = 2.0
     retry_max_delay_seconds: float = 20.0
     pause_seconds: float = 300.0
+    auto_resume_after_seconds: float = 0.0
 
     def __post_init__(self):
         if type(self.transport_retries) is not int or not 0 <= self.transport_retries <= 5:
             raise ValueError("recovery.transport_retries must be an integer in 0..5")
-        values = (self.retry_delay_seconds, self.retry_max_delay_seconds, self.pause_seconds)
+        values = (self.retry_delay_seconds, self.retry_max_delay_seconds, self.pause_seconds, self.auto_resume_after_seconds)
         if (
             any(type(v) not in (int, float) or not math.isfinite(v) for v in values)
             or not 0 <= self.retry_delay_seconds <= self.retry_max_delay_seconds <= 60
             or not 0 <= self.pause_seconds <= 3600
+            or not 0 <= self.auto_resume_after_seconds <= 3600
         ):
             raise ValueError("Invalid recovery delays: 0 <= delay <= max <= 60; 0 <= pause <= 3600")
 
@@ -58,7 +60,7 @@ class RecoveringPlanner:
         from fds.common.retry import retry_decision
 
         options = self.options
-        if not options.transport_retries:
+        if not options.transport_retries and not options.auto_resume_after_seconds:
             return self.planner.decide(context, images, directory)
         return retry_decision(
             self.planner.decide,
@@ -71,6 +73,9 @@ class RecoveringPlanner:
             model=getattr(self.planner, "model", None),
             effort=getattr(self.planner, "effort", None),
             pause_seconds=options.pause_seconds,
+            auto_resume_after_seconds=options.auto_resume_after_seconds,
+            sandbox_mode=getattr(self.planner, "sandbox_mode", None),
+            approval_policy=getattr(self.planner, "approval_policy", None),
         )
 
     def close(self):
@@ -190,3 +195,24 @@ def request_resume(directory):
 
 def effective_recovery(config):
     return asdict(planner_recovery_options(config))
+
+
+def automatic_cooldown(directory, seconds, error, attempt):
+    """One synchronous cooldown: no environment, tools, or memory are advanced."""
+    started = time.monotonic()
+    state = {"status": "automatic_cooldown", "attempt": attempt, "error": str(error),
+             "error_type": type(error).__name__, "max_pause_seconds": seconds,
+             "environment_held": True, "process_checkpoint": False}
+    path = Path(directory) / "recovery.json"
+    AuditJournal.write(path, state)
+    try:
+        time.sleep(seconds)
+        state["status"] = "automatically_resumed"
+    except BaseException:
+        state["status"] = "interrupted"
+        raise
+    finally:
+        state["wait_seconds"] = time.monotonic() - started
+        state["environment_held"] = False
+        AuditJournal.write(path, state)
+    return state["wait_seconds"]

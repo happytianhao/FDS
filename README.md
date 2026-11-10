@@ -9,6 +9,27 @@ The initial release supports only:
 
 There are no copied historical result directories, credentials, or dependency checkouts in this repository. A fresh clone can install FDS and fetch the pinned benchmark sources independently of the original Harness checkout.
 
+## Current harness + memory + FDS, without skills
+
+Use [configs/robomme_plus/task_harness.toml](configs/robomme_plus/task_harness.toml)
+for the current consolidated candidate: RoboMME-Plus **train**, `gpt-6-astra`,
+medium effort, persistent structured episode memory, full FDS with execution
+outcome checks, and `skills = []`. The budget is 100 planner calls per episode
+and 400 environment steps per tool batch, with seed 7. Meta Harness, policy skills and training examples are disabled
+in this profile; no optimizer runs unless separately started.
+
+For Codex inference, harness rules replace the coding base through
+`model_instructions_file`; dynamic observations and memory stay in the user
+input. `skills.include_instructions=false` also suppresses Codex skill listings.
+Requests retain `workspace-write` and approval `never`, with shell and external
+tools disabled. Each request records the protocol and prompt hashes.
+
+This consolidates the v029 recovery foundation with new outcome checking and
+prompt isolation. It is the **current engineering candidate**, not a demonstrated
+best score across all 50 training cases. Historical runs used different versions
+and cannot be combined into a single-version success rate. See the
+[version, settings and validation record](docs/current_skill_free_version.md).
+
 ## FDS protocol
 
 The full FDS protocol adds `fds_contract` to the normal Sys2 response, alongside
@@ -28,13 +49,22 @@ proof of semantic task success: the verdict is `contradicted` for explicit publi
 execution errors and `uncertain` when the command ran but the task outcome is not
 publicly verified. This makes mistakes traceable for later meta-harness diagnosis.
 
+Full mode now also binds the selected candidate to the actual ordered tools and
+checks each expected outcome and falsifier on a subsequent normal planner call.
+The host validates evidence provenance, event revisions and memory consistency;
+visual judgments remain model assessments, not independent visual proof.
+See [the outcome-checking protocol and its limits](docs/fds_postcheck_implementation.md).
+
 Invalid model decisions are recorded in `audit/call_XXXX/decision_rejection.json`
 and returned as structured feedback on the next planner call. The environment,
 observation window and accepted memory stay unchanged; rejected memory deltas
 and tools are not applied. `task_harness.max_decision_corrections` defaults to 2
 (0 disables correction, maximum 5), and every correction consumes the existing
 episode call budget. Consecutive failures beyond this limit stop with
-`decision_recovery_exhausted`; API and runtime faults still propagate. Episode
+`decision_recovery_exhausted`. The recommended Plus config separately retries
+transient request failures, with one bounded cooldown and no tool replay;
+permanent errors and exhausted recovery remain explicit failures. See
+[request reliability](docs/request_reliability.md). Episode
 summaries record rejection, correction and recovery counts. The same mechanism
 applies in both ablation modes without adding FDS instructions to contract-off
 requests.
@@ -65,11 +95,14 @@ observations, memory, environment and auxiliary tools, and budgets. The mode is
 also removed from the model prompt, so the baseline cannot see an instruction to
 produce a contract. `contract_mode = "full"` restores the complete protocol.
 
-The first public configuration intentionally has `skills = []`. The interface is already present so skills can be added later from training evidence without changing the benchmark, model, or evaluator.
+The recommended configuration intentionally has `skills = []`. Memory and FDS
+remain active; neither requires a skill library.
 
 ## Installation
 
 FDS requires Python 3.11 or 3.12 and uses `uv` for a locked environment.
+The lockfile uses the Tsinghua PyPI mirror. The `dev` extra includes `psutil`
+for the optional campaign process monitor and its offline tests.
 
 ```bash
 git clone <your-fds-repository-url>

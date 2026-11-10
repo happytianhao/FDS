@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import base64
+import hashlib
 import json
 import math
 import os
@@ -40,6 +41,10 @@ class CodexPlanner:
     No credential values are read or copied into the repository. Each call runs
     without user/project instructions, shell, external tools, or shared memory.
     """
+
+    sandbox_mode, approval_policy = "workspace-write", "never"
+    prompt_protocol = "codex_base_instructions_v1"
+    skills_include_instructions = False
 
     def __init__(
         self,
@@ -106,6 +111,7 @@ class CodexPlanner:
                 max_delay=self.retry_max_delay_seconds,
                 model=self.model,
                 effort=self.effort,
+                sandbox_mode=self.sandbox_mode, approval_policy=self.approval_policy,
             )
         return self._decide_once(context, images, directory)
 
@@ -115,8 +121,22 @@ class CodexPlanner:
         schema_path, output = directory / "schema.json", directory / "response.json"
         schema = decision_schema(context)
         schema_path.write_text(json.dumps(schema), encoding="utf-8")
-        prompt = make_prompt(context)
+        from fds.task_harness.protocol import make_system_prompt, make_user_prompt
+
+        prompt = make_user_prompt(context)
+        instructions = make_system_prompt(context)
+        instructions_path = directory / "system_prompt.txt"
+        instructions_path.write_text(instructions, encoding="utf-8")
         (directory / "prompt.txt").write_text(prompt, encoding="utf-8")
+        (directory / "prompt_manifest.json").write_text(json.dumps({
+            "prompt_protocol": self.prompt_protocol,
+            "base_instructions_source": "model_instructions_file",
+            "base_instructions_sha256": hashlib.sha256(instructions.encode()).hexdigest(),
+            "user_prompt_sha256": hashlib.sha256(prompt.encode()).hexdigest(),
+            "skills_include_instructions": False,
+            "configuration_provenance": "requested",
+        }), encoding="utf-8")
+        _requested_stats(directory, self)
         provider = "fds_one_pass"
         with tempfile.TemporaryDirectory(prefix="fds-inference-") as work:
             command = [
@@ -148,6 +168,10 @@ class CodexPlanner:
                 'web_search="disabled"',
                 "-c",
                 "project_doc_max_bytes=0",
+                "-c",
+                f"model_instructions_file={json.dumps(str(instructions_path))}",
+                "-c",
+                "skills.include_instructions=false",
             ]
             # Built-in provider IDs cannot be overridden. Keep official OpenAI auth
             # and default routing, with a per-process provider that cannot replay.
@@ -196,10 +220,22 @@ class CodexPlanner:
                 )
                 try:
                     process.communicate(prompt, timeout=self.timeout)
-                except BaseException:
+                except BaseException as exc:
                     if process.poll() is None:
                         os.killpg(process.pid, signal.SIGKILL)
                     process.wait()
+                    events.flush()
+                    from fds.common.retry import transient_codex_failure
+                    parsed = []
+                    for line in (directory / "events.jsonl").read_text().splitlines():
+                        try:
+                            event = json.loads(line)
+                        except json.JSONDecodeError:
+                            continue
+                        if isinstance(event, dict):
+                            parsed.append(event)
+                    if not transient_codex_failure("request timed out", parsed):
+                        exc.request_replay_forbidden = True
                     raise
             if process.returncode or not output.exists():
                 detail = ""
@@ -236,10 +272,13 @@ class CodexPlanner:
                     if transient_codex_failure(detail, parsed_events)
                     else RuntimeError
                 )
-                raise error_class(
+                failure = error_class(
                     f"Sys2 Codex call failed (exit {process.returncode}){detail}; "
                     f"inspect {directory / 'events.jsonl'} and {directory / 'stderr.log'}"
                 )
+                if error_class is RuntimeError:
+                    failure.request_replay_forbidden = True
+                raise failure
             usage = None
             completed = False
             for line in (directory / "events.jsonl").read_text().splitlines():
@@ -270,6 +309,8 @@ class CodexPlanner:
                         "effort": self.effort,
                         "sandbox_mode": "workspace-write",
                         "approval_policy": "never",
+                        "prompt_protocol": self.prompt_protocol,
+                        "skills_include_instructions": False,
                         "seconds": time.monotonic() - start,
                         "usage": usage,
                     }
@@ -296,6 +337,7 @@ class ResponsesPlanner:
             content.append({"type": "input_image", "image_url": f"data:image/png;base64,{encoded}"})
         client = self.client.with_options(max_retries=0)
         started = time.monotonic()
+        _requested_stats(directory, self)
         response = client.responses.create(
             model=self.model,
             reasoning={"effort": self.effort},
@@ -389,6 +431,7 @@ class ChatPlanner:
                 {"type": "image_url", "image_url": {"url": f"data:image/png;base64,{encoded}"}}
             )
         start = time.monotonic()
+        _requested_stats(directory, self)
         response = self.client.chat.completions.create(
             model=self.model,
             messages=[{"role": "user", "content": content}],
@@ -428,3 +471,15 @@ class ChatPlanner:
 
     def close(self):
         self.client.close()
+
+
+def _requested_stats(directory, planner):
+    """Record requested settings before a provider can fail; usage stays unknown."""
+    (Path(directory) / "stats.json").write_text(json.dumps({
+        "requested_model": planner.model, "requested_effort": getattr(planner, "effort", None),
+        "requested_sandbox_mode": getattr(planner, "sandbox_mode", None),
+        "requested_approval_policy": getattr(planner, "approval_policy", None),
+        "requested_prompt_protocol": getattr(planner, "prompt_protocol", None),
+        "requested_skills_include_instructions": getattr(planner, "skills_include_instructions", None),
+        "configuration_provenance": "requested", "configuration_verified": False, "usage": None,
+    }))

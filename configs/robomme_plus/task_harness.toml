@@ -1,4 +1,4 @@
-# FDS task harness: the initial public baseline intentionally has no skills.
+# Current skill-free candidate; validation scope: docs/current_skill_free_version.md.
 method = "task_harness"
 
 [benchmark]
@@ -20,8 +20,10 @@ enabled = false
 [fds]
 enabled = true
 contract_mode = "full"
+postcheck_enabled = true
 
 [task_harness]
+max_decision_corrections = 2
 max_keyframes = 4
 demo_frames = 16
 initial_live_frames = 6
@@ -34,6 +36,11 @@ skills = []
 max_rotation_rad = 0.6
 max_joint_delta_rad = 1.2
 max_joint_step_rad = 0.08
+
+[recovery]
+transport_retries = 3
+pause_seconds = 0
+auto_resume_after_seconds = 60
 
 [examples]
 enabled = false

@@ -1,0 +1,119 @@
+{
+  "checked_at": "2026-11-09T18:44:20.232044+00:00",
+  "source_commit": "13a36d281c6fb91f040bd16d65eeea760e463d80",
+  "base_candidate": "v029",
+  "active_campaign_modified": false,
+  "performance_validated": false,
+  "real_model_requests": 0,
+  "robot_episodes_started": 0,
+  "tests": {
+    "command": ".venv/bin/python -m pytest tests -q",
+    "passed": 139,
+    "failed": 0
+  },
+  "prompt_isolation": {
+    "passed": true,
+    "localhost_only_provider": true,
+    "temporary_auth_file_present": false,
+    "fixed_instruction_characters": 6991,
+    "fixed_instruction_sha256": "ec00685a18e2e25638d76588b20e5dec74dbef4bbc49a7d93c1f810f4bb6fdbc",
+    "cases": {
+      "default_base_skills_disabled": {
+        "exit_code": 1,
+        "timed_out": false,
+        "stdout_bytes": 361,
+        "stderr_bytes": 246,
+        "request_count": 1,
+        "requests": [
+          {
+            "message_count": 7,
+            "authority_characters": 25535,
+            "user_characters": 1155,
+            "native_coding_base_present": true,
+            "fixed_instructions_in_authority": false,
+            "fixed_marker_in_authority": false,
+            "fixed_marker_in_user": false,
+            "user_prompt_preserved": true,
+            "user_marker_in_authority": false,
+            "skill_catalog_marker_count": 1,
+            "generic_skills_heading_present": true,
+            "requested_model_preserved": true,
+            "requested_effort_preserved": true
+          }
+        ]
+      },
+      "harness_base_skills_default": {
+        "exit_code": 1,
+        "timed_out": false,
+        "stdout_bytes": 361,
+        "stderr_bytes": 246,
+        "request_count": 1,
+        "requests": [
+          {
+            "message_count": 7,
+            "authority_characters": 13088,
+            "user_characters": 1155,
+            "native_coding_base_present": false,
+            "fixed_instructions_in_authority": true,
+            "fixed_marker_in_authority": true,
+            "fixed_marker_in_user": false,
+            "user_prompt_preserved": true,
+            "user_marker_in_authority": false,
+            "skill_catalog_marker_count": 4,
+            "generic_skills_heading_present": true,
+            "requested_model_preserved": true,
+            "requested_effort_preserved": true
+          }
+        ]
+      },
+      "harness_base_skills_disabled": {
+        "exit_code": 1,
+        "timed_out": false,
+        "stdout_bytes": 361,
+        "stderr_bytes": 246,
+        "request_count": 1,
+        "requests": [
+          {
+            "message_count": 7,
+            "authority_characters": 11106,
+            "user_characters": 1155,
+            "native_coding_base_present": false,
+            "fixed_instructions_in_authority": true,
+            "fixed_marker_in_authority": true,
+            "fixed_marker_in_user": false,
+            "user_prompt_preserved": true,
+            "user_marker_in_authority": false,
+            "skill_catalog_marker_count": 0,
+            "generic_skills_heading_present": false,
+            "requested_model_preserved": true,
+            "requested_effort_preserved": true
+          }
+        ]
+      }
+    }
+  },
+  "source_sha256": {
+    "scripts/diagnostics/verify_codex_prompt_isolation.py": "7c683bc9116e9431c05d7166ea88aa5e423a529cbd602e62a5f72aaeb3902880",
+    "scripts/experiments/adaptive_train/optimizer.py": "52ddad6ba6941b76bade19a610bf22a864ad633f9da5d98eb6dcaf6fc8d0ad16",
+    "scripts/experiments/interface_ablation/run_one.py": "24f765803ea94b366500b2b3502f9e319dc1aa4aace861a5691fd8373505bec4",
+    "src/fds/cli.py": "a5f3955f72ab49ed8c350dd5a1347853e8edd9bdf351d3b50c740a6290e414b4",
+    "src/fds/planners.py": "d6a4c09115f21c5cd430056b2a695b1de222dbb10499c1acb45ce482781935ea",
+    "src/fds/task_harness/__init__.py": "17094ce1ba482a13cfd73371f4cf4d00e59ca0645e0c61ca44902c80fb8009c2",
+    "src/fds/task_harness/actions.py": "8d0b075dfdb98028a0f642a277f19bc712471966681a0bf6170d9f4b66efb79a",
+    "src/fds/task_harness/contracts.py": "b7b60a5a48cc561ce780e876819ce447a73a60fd276e539c57801ca0a43c2203",
+    "src/fds/task_harness/examples.py": "d65d5082527096e01c7a66f5061bc47efb8c1f2c233a027b54e0b0bd75d7500f",
+    "src/fds/task_harness/executor.py": "38a918677dbf5c733906b4e3ca24da270dff8f17e90978fbd5b930b68d58ef83",
+    "src/fds/task_harness/fds.py": "bf2113f9a958f93c468a98a63ae33986f143767f9c85bbf30c846c18e6678e5b",
+    "src/fds/task_harness/geometry.py": "a2f09a99cd758470a767e29f166e7e76568da173253f1a42834791deb2f6e4fd",
+    "src/fds/task_harness/memory.py": "5767687c23b9cd32d51d138785a8f5f7c61fd6dd2bd9cd0928822262acf1ee63",
+    "src/fds/task_harness/observation.py": "0fa5443c4df7d6d44ce30f22b84de677827c387ed6a6f0006a43262353785a34",
+    "src/fds/task_harness/postcheck.py": "d7236ff70c3364a81b727860c68e4d924373b0ac309bd2e61b0c5384d69e0925",
+    "src/fds/task_harness/protocol.py": "f2621cf5bb4ba5abce376ca9877d791ab1dc8e95fc0f40655025d3b22de7261a",
+    "src/fds/task_harness/runtime.py": "2b4e73490f0f571ab9b08ff8c5d7340fd82d1b5ed5f9de96d93d2c82e45e18f6",
+    "src/fds/task_harness/skills.py": "60bdfd037b917ef1875dab15ef9877eb17f52e41a1af69cdb991028fc618a381",
+    "src/fds/task_harness/tools.py": "11a9fd53d3eff4ca75d5dca90d43ddd7f30ccc0372edc744aa61811604f5addb",
+    "tests/test_outcome_postcheck.py": "ed3e0498b5cbf6385f715dee0e93d502d05c394030bfae56e5c762a6e0b859b7",
+    "tests/test_prompt_injection.py": "0d8e6e385f6fc0f7072cbefeeeb5aefaea263723a6c815dae11696966e3e13b4"
+  },
+  "record_scope": "Initial implementation validation before release organization. source_commit is the Git base; source_sha256 identifies the then-uncommitted candidate. Final release validation is documented in docs/current_skill_free_version.md."
+}

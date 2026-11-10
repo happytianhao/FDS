@@ -21,6 +21,11 @@ Follow the supplied interface contracts and budgets. Return only the specified s
 There is no implicit conversation history or access to external information.
 """
 
+INSTRUCTION_KEYS = (
+    "tool_definitions", "execution_contract", "memory_contract", "fds_protocol",
+    "outcome_protocol", "coordinates", "joint_motion_limits", "task_language_conventions",
+)
+
 TRAINING_FRAME_ID = {"type": "string", "maxLength": 80, "pattern": "^training:[0-9]+:[0-9]+$"}
 FRAME_ID = {"anyOf": [{"type": "integer", "minimum": 0}, TRAINING_FRAME_ID]}
 REFS = array(FRAME_ID, 8)
@@ -120,7 +125,28 @@ def schema_for(context):
         ),
     }
     if context.get("contract_mode", "full") != "off":
-        response["fds_contract"] = FDS_CONTRACT
+        response["fds_contract"] = deepcopy(FDS_CONTRACT)
+        if "outcome_protocol" in context:
+            from fds.task_harness.postcheck import response_fields
+
+            additions = response_fields(context)
+            response["fds_contract"]["properties"].update(additions)
+            response["fds_contract"]["required"].extend(additions)
+        # Use exactly the provenance set enforced by the executor, not the
+        # review-window inventory (whose images may not have been delivered).
+        if "available_evidence_frames" in context:
+            available = context["available_evidence_frames"]
+            choices = []
+            for kind, cls in (("integer", int), ("string", str)):
+                values = list(dict.fromkeys(x for x in available if type(x) is cls))
+                if values:
+                    choices.append({"type": kind, "enum": values})
+            for group in ("assumptions", "required_evidence"):
+                refs = response["fds_contract"]["properties"][group]["items"]["properties"]["evidence_refs"]
+                if choices:
+                    refs["items"] = {"anyOf": deepcopy(choices)}
+                else:
+                    refs["maxItems"] = 0
     return obj(**response)
 
 
@@ -139,6 +165,26 @@ class TaskDecision:
         try:
             jsonschema.validate(value, schema)
         except jsonschema.ValidationError as exc:
+            # Dynamic citation enums may reject at the provider-parse boundary,
+            # before executor provenance validation. Preserve actionable citation
+            # feedback there as well; do not weaken or repair the schema/value.
+            contract_schema = schema.get("properties", {}).get("fds_contract", {})
+            refs = contract_schema.get("properties", {}).get("assumptions", {}).get(
+                "items", {}).get("properties", {}).get("evidence_refs", {})
+            choices = refs.get("items", {}).get("anyOf", [])
+            bounded = refs.get("maxItems") == 0 or bool(choices and all("enum" in c for c in choices))
+            contract = value.get("fds_contract") if isinstance(value, dict) else None
+            base_contract = {
+                key: item for key, item in contract.items() if key in FDS_CONTRACT["properties"]
+            } if isinstance(contract, dict) else None
+            if bounded and jsonschema.Draft7Validator(FDS_CONTRACT).is_valid(base_contract):
+                available = [] if refs.get("maxItems") == 0 else [x for c in choices for x in c["enum"]]
+                try:
+                    validate_contract(base_contract, delivered_frames=available)
+                except ValueError as citation_error:
+                    raise DecisionValidationError(
+                        str(citation_error), code="contract_validation", path=["fds_contract"], response=response
+                    ) from exc
             raise DecisionValidationError(
                 exc.message, code="schema_validation", path=exc.absolute_path, response=response
             ) from exc
@@ -184,19 +230,30 @@ class TaskDecision:
         )
 
 
-def make_prompt(context):
+def make_user_prompt(context):
     prompt_context = deepcopy(context)
     # contract_mode is an executor-side ablation switch, not a model instruction.
     prompt_context.pop("contract_mode", None)
-    return (
-        SYSTEM_PROMPT
-        + "\n"
-        + json.dumps(prompt_context, ensure_ascii=False, allow_nan=False, separators=(",", ":"))
+    for key in INSTRUCTION_KEYS:
+        prompt_context.pop(key, None)
+    return json.dumps(prompt_context, ensure_ascii=False, allow_nan=False, separators=(",", ":"))
+
+
+def make_system_prompt(context):
+    """Base instructions and host-supplied interface rules, without episode observations."""
+    contracts = {key: deepcopy(context[key]) for key in INSTRUCTION_KEYS if key in context}
+    return SYSTEM_PROMPT + "\nInterface contracts:\n" + json.dumps(
+        contracts, ensure_ascii=False, allow_nan=False, separators=(",", ":")
     )
 
 
+def make_prompt(context):
+    """Legacy combined representation used for audit comparisons and retry hashes."""
+    return make_system_prompt(context) + "\n" + make_user_prompt(context)
+
+
 def mock_decision(context):
-    return TaskDecision(
+    decision = TaskDecision(
         {
             "kind": "environment",
             "subgoal": "Observe the next state",
@@ -226,3 +283,20 @@ def mock_decision(context):
         {group: [] for group in RECORDS},
         [],
     )
+    if "outcome_protocol" in context:
+        pending = context.get("pending_outcome_review")
+        decision.fds_contract.update(
+            action_binding={"candidate_id": "wait", "tool_indices": [0],
+                            "event_ids": [], "event_dependencies": []},
+            outcome_review={
+                "action_call": pending["action_call"] if pending else None,
+                "checks": [
+                    {"id": check["id"], "status": "unknown", "basis": "unknown",
+                     "evidence_refs": [], "receipt_indices": [],
+                     "reason": "Offline fixture makes no semantic assessment"}
+                    for check in pending["checks"]
+                ] if pending else [],
+                "event_resolutions": [],
+            },
+        )
+    return decision

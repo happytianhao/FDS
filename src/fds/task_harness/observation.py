@@ -18,6 +18,26 @@ def group_images_by_camera(paths, labels):
     return [p for p, _ in grouped], [label for _, label in grouped]
 
 
+def deduplicate_image_inputs(paths, labels):
+    """Send each supplied frame/camera once, preserving all delivery provenance."""
+    unique = {}
+    for path, label in zip(paths, labels, strict=True):
+        key = (label["origin"], label["frame"], label["camera"])
+        if key not in unique:
+            unique[key] = (path, deepcopy(label))
+            continue
+        old_path, old_label = unique[key]
+        # A frame identity must not silently collapse different image files.
+        if old_path != path:
+            raise ValueError("Conflicting image paths for one frame/camera identity")
+        sources = list(dict.fromkeys([
+            *old_label.get("sources", [old_label.get("source")]),
+            *label.get("sources", [label.get("source")]),
+        ]))
+        old_label["sources"] = [source for source in sources if source is not None]
+    return [p for p, _ in unique.values()], [label for _, label in unique.values()]
+
+
 def image_inputs(frames, directory):
     """Materialize only supplied images, preserving separate training frame IDs."""
     paths, labels = [], []

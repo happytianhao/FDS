@@ -3,7 +3,7 @@
 from collections import Counter
 from copy import deepcopy
 
-from fds.task_harness.protocol import LIMITS, RECORDS
+from fds.task_harness.protocol import LIMITS, RECORDS, REFS
 
 
 class EpisodicMemory:
@@ -53,7 +53,7 @@ class EpisodicMemory:
             duplicates = Counter(ids)
             for change, rid in zip(changes, ids, strict=True):
                 previous = self.memory[group].get(rid)
-                error = None
+                error, details = None, {}
                 if duplicates[rid] > 1:
                     error = "Duplicate operations for the same ID"
                 elif change["op"] == "upsert":
@@ -62,14 +62,59 @@ class EpisodicMemory:
                     if previous and group == "objects":
                         old_refs.add(previous["last_seen_frame"])
                     legal = set(available) | old_refs
-                    if not set(row["evidence_frames"]) <= legal:
+                    invalid_refs = set(row["evidence_frames"]) - legal
+                    invalid_last_seen = (
+                        group == "objects" and row["last_seen_frame"] not in legal | {-1}
+                    )
+                    details = {
+                        "available_evidence_frames": sorted(available, key=str),
+                        "prior_record_refs": sorted(old_refs, key=str),
+                        "legal_evidence_frames": sorted(legal, key=str),
+                        "invalid_evidence_refs": sorted(invalid_refs, key=str),
+                    }
+                    if group == "objects":
+                        details["legal_last_seen_frames"] = sorted(legal | {-1}, key=str)
+                        if invalid_last_seen:
+                            details["invalid_last_seen_frame"] = row["last_seen_frame"]
+                    if previous is None and limit is not None and len(self.memory[group]) >= limit:
+                        details["capacity"] = {
+                            "limit": limit, "occupied_ids": sorted(self.memory[group]),
+                            "occupied_count": len(self.memory[group]),
+                        }
+                    if invalid_refs:
                         error = "Evidence frame was not supplied and is not this record's prior provenance"
-                    elif group == "objects" and row["last_seen_frame"] not in legal | {-1}:
+                        # Keep the rejected proposal available for a model-authored
+                        # repair. It is not accepted memory or additional evidence.
+                        details["rejected_record"] = deepcopy(row)
+                        details["max_evidence_frames"] = REFS["maxItems"]
+                        details["repair_instruction"] = (
+                            "rejected_record is an unapplied proposal, not verified memory. "
+                            "Correct evidence_frames using at most "
+                            f"{REFS['maxItems']} individual IDs from legal_evidence_frames; "
+                            "select a relevant subset rather than concatenating IDs or "
+                            "encoding a range as one integer. Do not guess how to split "
+                            "an invalid ID. Reassess claims against available evidence "
+                            "and preserve uncertainty before resubmitting the record. "
+                            "Prior record references preserve text provenance only; "
+                            "they do not restore images. No repair was applied automatically."
+                        )
+                    elif invalid_last_seen:
                         error = "last_seen_frame has no available provenance"
                     elif (
                         previous is None and limit is not None and len(self.memory[group]) >= limit
                     ):
                         error = "Memory capacity reached; delete an entry before adding one"
+                        details["rejected_record"] = deepcopy(row)
+                        details["repair_instruction"] = (
+                            "rejected_record is an unapplied proposal, not verified memory. "
+                            "If it remains useful, explicitly delete a less useful record "
+                            "before resubmitting it, or revise a relevant existing record "
+                            "without reassigning its identity. No record was evicted. "
+                            "Reassess evidence against the next request's available frames "
+                            "and that record's own prior provenance; rejected references "
+                            "do not grant future citation rights or restore images. "
+                            "Preserve unresolved outcomes and uncertainty."
+                        )
                 if error is None:
                     if change["op"] == "delete":
                         self.memory[group].pop(rid, None)
@@ -82,6 +127,7 @@ class EpisodicMemory:
                         "operation": change["op"],
                         "status": "rejected" if error else "accepted",
                         "error": error,
+                        **({"rejection_details": details} if error else {}),
                         "resolution": "kept_previous"
                         if error and previous
                         else "not_added"
@@ -91,11 +137,20 @@ class EpisodicMemory:
                 )
         counts = Counter(c["frame_id"] for c in decision.keyframe_changes)
         for change in decision.keyframe_changes:
-            fid, error = change["frame_id"], None
+            fid, error, details = change["frame_id"], None, {}
             if counts[fid] > 1:
                 error = "Duplicate keyframe operations"
             elif change["op"] == "save":
+                details = {
+                    "available_evidence_frames": sorted(available, key=str),
+                    "legal_frame_ids": sorted(available, key=str),
+                    "capacity": {
+                        "limit": self.max_frames, "occupied_ids": sorted(self.frames, key=str),
+                        "occupied_count": len(self.frames),
+                    },
+                }
                 if fid not in available:
+                    details["invalid_frame_id"] = fid
                     error = "Frame not supplied or retained; review the active window first if still available"
                 elif fid not in self.frames and len(self.frames) >= self.max_frames:
                     error = "Keyframe capacity reached; delete a frame before saving another"
@@ -120,6 +175,7 @@ class EpisodicMemory:
                     "event": "retention_operation",
                     "operation": {"operation": change["op"], **change},
                     "rejection": error,
+                    **({"rejection_details": details} if error else {}),
                 }
             )
             results.append(
@@ -128,6 +184,7 @@ class EpisodicMemory:
                     "id": str(fid),
                     "status": "rejected" if error else "accepted",
                     "error": error,
+                    **({"rejection_details": details} if error else {}),
                 }
             )
         self.last_validation = results
